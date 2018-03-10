@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
@@ -56,20 +57,28 @@ namespace bsuir_chat_bot
 //                Console.WriteLine(ex.StackTrace);
 //                Console.WriteLine($"N = {n}");
 //            }
+            
+            var botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
             var funcs = new Dictionary<string, Func<List<string>, string>>();
 
             var quote = new QuoteProvider("Fuhrer.json");
             var ping = new PingProvider();
+            var flipcoin = new FlipcoinProvider();
 
             foreach (var func in quote.Functions)
             {
-                funcs.Add(func.Key, func.Value);
+                funcs[func.Key] = func.Value;
             }            
             
             foreach (var func in ping.Functions)
             {
-                funcs.Add(func.Key, func.Value);
+                funcs[func.Key] = func.Value;
+            }         
+            
+            foreach (var func in flipcoin.Functions)
+            {
+                funcs[func.Key] = func.Value;
             }
             
 //            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
@@ -79,7 +88,14 @@ namespace bsuir_chat_bot
             while (!string.IsNullOrEmpty(x = Console.ReadLine()))
             {
                 var s = x.Split(" ").ToList();
-                Console.WriteLine(funcs[s[0]](s.Skip(1).ToList()));
+                var match = botCommandRegex.Match(s[0]);
+
+                if (!match.Success) continue;
+                
+                var command = match.Groups[1].Value;
+                
+                if (funcs.ContainsKey(command))
+                    Console.WriteLine(funcs[command](s.Skip(1).ToList()));
             }
             
 //            while (int.TryParse(Console.ReadLine(), out var x))
