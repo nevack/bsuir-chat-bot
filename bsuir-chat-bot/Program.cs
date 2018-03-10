@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
@@ -55,20 +57,42 @@ namespace bsuir_chat_bot
 //                Console.WriteLine($"N = {n}");
 //            }
 
+            var funcs = new Dictionary<string, Func<List<string>, string>>();
+
             var quote = new QuoteProvider("Fuhrer.json");
-            while (int.TryParse(Console.ReadLine(), out var x))
+            var ping = new PingProvider();
+
+            foreach (var func in quote.Functions)
             {
-                try
-                {
-                    Console.WriteLine(quote[x].Text);
-                }
-                catch (ArgumentOutOfRangeException e)
-                {
-                    Console.WriteLine("Столько цитат ещё не добавлено!");
-                }
+                funcs.Add(func.Key, func.Value);
+            }            
+            
+            foreach (var func in ping.Functions)
+            {
+                funcs.Add(func.Key, func.Value);
             }
             
+//            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
+//            jsons.ForEach(Console.WriteLine);
+
+            string x;
+            while (!string.IsNullOrEmpty(x = Console.ReadLine()))
+            {
+                var s = x.Split(" ").ToList();
+                Console.WriteLine(funcs[s[0]](s.Skip(1).ToList()));
+            }
             
+//            while (int.TryParse(Console.ReadLine(), out var x))
+//            {
+//                try
+//                {
+//                    Console.WriteLine(quote[x].Text);
+//                }
+//                catch (ArgumentOutOfRangeException e)
+//                {
+//                    Console.WriteLine("Столько цитат ещё не добавлено!");
+//                }
+//            }
             
             Console.ReadKey();
         }

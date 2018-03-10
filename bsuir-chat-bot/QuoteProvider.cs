@@ -1,49 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace bsuir_chat_bot
 {
-    public class QuoteProvider
+    public class QuoteProvider : IBotProvider
     {
-        private static Dictionary<string, Func<List<string>, string>> funcs;
-        private QuoteDictionary quotedict;
-        private string quoteFile;
+        public Dictionary<string, Func<List<string>, string>> Functions { get; }
+        
+        private QuoteDictionary _quotedict;
+        private string _quoteFile;
 
         internal QuoteProvider(string quoteFile)
         {
-            this.quoteFile = quoteFile;
+            ReloadQuotes(quoteFile);
 
-            var json = File.ReadAllText(quoteFile);
-            quotedict = JObject.Parse(json).ToObject<QuoteDictionary>();
+            Functions = new Dictionary<string, Func<List<string>, string>>
+            {
+                {"quote", list => GetQuote(Convert.ToInt32(list[0])).Text}
+            };
         }
 
-        private Quote GetQuote(List<string> args)
+        private Quote GetQuote(int index)
         {
-            var index = int.Parse(args[0]);
-            return GetQuote(index);
-        }
-
-        public Quote GetQuote(int index)
-        {
-            if (index < 0) index = quotedict.Quotes.Count + index;
+            if (index < 0) index = _quotedict.Quotes.Count + index;
             
-            return quotedict.Quotes[index];
+            return _quotedict.Quotes[index];
         }
 
         public Quote this[int index] => GetQuote(index);
 
         public void ReloadQuotes()
         {
-            var json = File.ReadAllText(quoteFile);
-            quotedict = JObject.Parse(json).ToObject<QuoteDictionary>();
+            var json = File.ReadAllText(_quoteFile);
+            _quotedict = JObject.Parse(json).ToObject<QuoteDictionary>();
         }
 
         public void ReloadQuotes(string fileName)
         {
-            quoteFile = fileName;
+            _quoteFile = fileName;
             ReloadQuotes();
         }
     }

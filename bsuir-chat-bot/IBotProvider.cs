@@ -5,6 +5,9 @@ namespace bsuir_chat_bot
 {
     public interface IBotProvider
     {
-        Dictionary<string, Func<List<string>, string>> GetFunctions();
+        Dictionary<string, Func<List<string>, string>> Functions
+        {
+            get;
+        }
     }
 }
