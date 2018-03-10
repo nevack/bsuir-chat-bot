@@ -14,8 +14,11 @@ namespace bsuir_chat_bot
 {
     class Program
     {
+        public static DateTime StartTime;
+        
         static void Main(string[] args)
         {
+            StartTime = DateTime.Now;
 //            var builder = new ConfigurationBuilder()
 //                .SetBasePath(Directory.GetCurrentDirectory())
 //                .AddJsonFile("botconfig.json");
