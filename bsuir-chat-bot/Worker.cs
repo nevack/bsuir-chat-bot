@@ -34,22 +34,20 @@ namespace bsuir_chat_bot
         {
             while (!Kill)
             {
+                Task task = null;
                 lock (_queue)
-                {
                     if (_queue.Count != 0)
+                        task = _queue.Dequeue();
+                if (task != null)
+                {
+                    var returnValue = task.Function(task.Args);
+                    lock (_returnQueue)
                     {
-                        var task = _queue.Dequeue();
-                        string returnValue = task.Function(task.Args);
-                        lock (_returnQueue)
-                        {
-                            _returnQueue.Enqueue(returnValue);
-                        }
-                    }
-                    else
-                    {
-                        Thread.Sleep(5);
+                        _returnQueue.Enqueue(returnValue);
                     }
                 }
+                else
+                    Thread.Sleep(10);
             }
         }
     }

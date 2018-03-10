@@ -131,6 +131,7 @@ namespace bsuir_chat_bot
             }
 
             Worker.Kill = true;
+            
 //            while (int.TryParse(Console.ReadLine(), out var x))
 //            {
 //                try
