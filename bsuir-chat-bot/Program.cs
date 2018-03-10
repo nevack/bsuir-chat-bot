@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices.ComTypes;
+<<<<<<< HEAD
 using System.Threading;
+=======
+>>>>>>> 1e13fb675aca22e4264c4952eb12a7b7ab46b43c
 using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
@@ -65,7 +68,10 @@ namespace bsuir_chat_bot
 
             var quote = new QuoteProvider("Fuhrer.json");
             var ping = new PingProvider();
+<<<<<<< HEAD
             var wait = new WaitProvider();
+=======
+>>>>>>> 1e13fb675aca22e4264c4952eb12a7b7ab46b43c
 
             foreach (var func in quote.Functions)
             {
