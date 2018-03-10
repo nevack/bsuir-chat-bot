@@ -40,6 +40,10 @@
           "version": "[2.0.0, )",
           "autoReferenced": true
         },
+        "Newtonsoft.Json": {
+          "target": "Package",
+          "version": "[11.0.1, )"
+        },
         "VkNet": {
           "target": "Package",
           "version": "[1.32.0, )"
