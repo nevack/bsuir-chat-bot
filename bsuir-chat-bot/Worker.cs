@@ -38,6 +38,7 @@ namespace bsuir_chat_bot
                 if (_queue.TryDequeue(out var task))
                 {
                     var returnValue = task.Function(task.Args);
+                    Console.WriteLine(returnValue);
                     _returnQueue.Enqueue(returnValue);
                 }
                 else

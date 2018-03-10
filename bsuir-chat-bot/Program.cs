@@ -100,13 +100,11 @@ namespace bsuir_chat_bot
             
             var requestQueue = new ConcurrentQueue<Worker.Task>();
             var returnQueue = new ConcurrentQueue<string>();
-            var workersList = new List<Thread>();
             
             for (int i = 0; i < NumberOfWorkerThreads; i++)
             {
                 var worker = new Worker(requestQueue, returnQueue);
                 var workerThread = new Thread(worker.Work);
-                workersList.Add(workerThread);
                 workerThread.Start();
             }
             
@@ -128,11 +126,6 @@ namespace bsuir_chat_bot
                 }
                 Console.WriteLine("Request accepted");
             }
-
-            while (returnQueue.TryDequeue(out var result))
-                Console.WriteLine(result);
-
-            Worker.Kill = true;
             
 //            while (int.TryParse(Console.ReadLine(), out var x))
 //            {
@@ -147,6 +140,7 @@ namespace bsuir_chat_bot
 //            }
             
             Console.ReadKey();
+            Worker.Kill = true;
         }
     }
 }
