@@ -13,58 +13,41 @@ using VkNet;
 using VkNet.Enums.Filters;
 using VkNet.Exception;
 using VkNet.Model.RequestParams;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace bsuir_chat_bot
 {
     class Program
     {
+        public static readonly HttpClient Client = new HttpClient();
         public static DateTime StartTime;
         private const int NumberOfWorkerThreads = 4;
         
         static void Main(string[] args)
         {
             StartTime = DateTime.Now;
-//            var builder = new ConfigurationBuilder()
-//                .SetBasePath(Directory.GetCurrentDirectory())
-//                .AddJsonFile("botconfig.json");
-//
-//            var configuration = builder.Build();
-//
-//            Console.WriteLine($"{configuration["appid"]}");
-//            Console.WriteLine($"{configuration["login"]}");
-//            Console.WriteLine($"{configuration["password"]}");
-//            Console.WriteLine($"{configuration["accesstoken"]}");
-//            Console.WriteLine($"{configuration["shortenerapikey"]}");
-//            Console.WriteLine("Press a key...");
-//            Console.ReadKey();
-//            
-//            var api = new VkApi();
-//	
-//            api.Authorize(new ApiAuthParams
-//            {
-//                ApplicationId = ulong.Parse(configuration["appid"]),
-//                Login = configuration["login"],
-//                Password = configuration["password"],
-//                Settings = Settings.All
-//            });
-//            
-//            Console.WriteLine(api.Token);
-//
-//            var n = 0;
-//            try
-//            {
-//                while (!Console.KeyAvailable)
-//                {
-//                    var r = api.Groups.Get(new GroupsGetParams());
-//                    n++;
-//                }
-//
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.StackTrace);
-//                Console.WriteLine($"N = {n}");
-//            }
+            
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("botconfig.json");
+
+            var configuration = builder.Build();
+
+            Console.WriteLine($"{configuration["appid"]}");
+            Console.WriteLine($"{configuration["login"]}");
+            Console.WriteLine($"{configuration["password"]}");
+            Console.WriteLine($"{configuration["accesstoken"]}");
+            Console.WriteLine($"{configuration["shortenerapikey"]}");
+            
+            var api = new VkApi(null);
+	
+            api.Authorize(new ApiAuthParams
+            {
+                ApplicationId = ulong.Parse(configuration["appid"]),
+                AccessToken = configuration["accesstoken"],
+                Settings = Settings.All
+            });
             
             var botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
@@ -108,9 +91,30 @@ namespace bsuir_chat_bot
                 workerThread.Start();
             }
             
-            string x;
-            while (!string.IsNullOrEmpty(x = Console.ReadLine()))
+            string x = "kek";
+            long ts = -1;
+            var server = api.Messages.GetLongPollServer();
+            while (!string.IsNullOrEmpty(x))
             {
+                var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={ts}&wait=25&mode=2&version=2", null);
+                response.Wait();
+                var responseString = response.Result.Content.ReadAsStringAsync().Result;
+                var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
+                
+                ts = responseDict["ts"];
+                
+                if (!responseDict.Keys.Contains("updates")) continue;
+                bool isAMessage = false;
+                foreach (var update in responseDict["updates"])
+                {
+                    if (update[0] == 4)
+                    {
+                        x = update[5];
+                        isAMessage = true;
+                        break;
+                    }
+                }
+                if (!isAMessage) continue;
                 var s = x.Split(" ").ToList();
                 
                 var match = botCommandRegex.Match(s[0]);
