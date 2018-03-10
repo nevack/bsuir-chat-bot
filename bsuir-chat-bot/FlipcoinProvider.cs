@@ -15,8 +15,18 @@ namespace bsuir_chat_bot
         {
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
-                {"flipcoin", list => coins[Random.Next() % coins.Length]}
+                {"flipcoin", list => coins[Random.Next() % coins.Length]},
+                {"uptime", GetUptime}
             };
+        }
+
+        private string GetUptime(List<string> args)
+        {
+            var curTime = DateTime.Now;
+
+            var uptime = curTime - Program.StartTime;
+
+            return uptime.ToString(@"d\.hh\:mm\:ss");
         }
     }
 }

@@ -16,10 +16,12 @@ namespace bsuir_chat_bot
 {
     class Program
     {
+        public static DateTime StartTime;
         private const int NumberOfWorkerThreads = 4;
         
         static void Main(string[] args)
         {
+            StartTime = DateTime.Now;
 //            var builder = new ConfigurationBuilder()
 //                .SetBasePath(Directory.GetCurrentDirectory())
 //                .AddJsonFile("botconfig.json");
