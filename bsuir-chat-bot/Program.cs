@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using VkNet;
@@ -15,6 +17,7 @@ namespace bsuir_chat_bot
     class Program
     {
         public static DateTime StartTime;
+        private const int NumberOfWorkerThreads = 4;
         
         static void Main(string[] args)
         {
@@ -67,8 +70,9 @@ namespace bsuir_chat_bot
 
             var quote = new QuoteProvider("Fuhrer.json");
             var ping = new PingProvider();
+            var wait = new WaitProvider();
             var flipcoin = new FlipcoinProvider();
-
+            
             foreach (var func in quote.Functions)
             {
                 funcs[func.Key] = func.Value;
@@ -84,23 +88,51 @@ namespace bsuir_chat_bot
                 funcs[func.Key] = func.Value;
             }
             
+            foreach (var func in wait.Functions)
+            {
+                funcs[func.Key] = func.Value;
+            }
+            
 //            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
 //            jsons.ForEach(Console.WriteLine);
-
+            
+            var requestQueue = new Queue<Worker.Task>();
+            var returnQueue = new Queue<string>();
+            var workersList = new List<Thread>();
+            
+            for (int i = 0; i < NumberOfWorkerThreads; i++)
+            {
+                var worker = new Worker(requestQueue, returnQueue);
+                var workerThread = new Thread(worker.Work);
+                workersList.Add(workerThread);
+                workerThread.Start();
+            }
+            
             string x;
             while (!string.IsNullOrEmpty(x = Console.ReadLine()))
             {
                 var s = x.Split(" ").ToList();
+                Console.WriteLine("Request accepted");
+                
                 var match = botCommandRegex.Match(s[0]);
 
                 if (!match.Success) continue;
                 
                 var command = match.Groups[1].Value;
-                
+
                 if (funcs.ContainsKey(command))
-                    Console.WriteLine(funcs[command](s.Skip(1).ToList()));
+                {
+                    var task = new Worker.Task(funcs[s[0]], s.Skip(1).ToList());
+                    requestQueue.Enqueue(task);
+                }
             }
-            
+
+            while (returnQueue.Count != 0)
+            {
+                Console.WriteLine(returnQueue.Dequeue());
+            }
+
+            Worker.Kill = true;
 //            while (int.TryParse(Console.ReadLine(), out var x))
 //            {
 //                try
