@@ -425,3 +425,5 @@ crashlytics-build.properties
 fabric.properties
 /bsuir-chat-bot/**.txt
 /bsuir-chat-bot/*.json
+/bsuir-chat-bot/obj/*
+/bsuir-chat-bot/bin/*
