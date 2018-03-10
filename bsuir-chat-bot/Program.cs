@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using NLog.Targets;
 using VkNet;
 using VkNet.Enums.Filters;
 using VkNet.Exception;
@@ -96,8 +98,8 @@ namespace bsuir_chat_bot
 //            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
 //            jsons.ForEach(Console.WriteLine);
             
-            var requestQueue = new Queue<Worker.Task>();
-            var returnQueue = new Queue<string>();
+            var requestQueue = new ConcurrentQueue<Worker.Task>();
+            var returnQueue = new ConcurrentQueue<string>();
             var workersList = new List<Thread>();
             
             for (int i = 0; i < NumberOfWorkerThreads; i++)
@@ -112,7 +114,6 @@ namespace bsuir_chat_bot
             while (!string.IsNullOrEmpty(x = Console.ReadLine()))
             {
                 var s = x.Split(" ").ToList();
-                Console.WriteLine("Request accepted");
                 
                 var match = botCommandRegex.Match(s[0]);
 
@@ -122,15 +123,14 @@ namespace bsuir_chat_bot
 
                 if (funcs.ContainsKey(command))
                 {
-                    var task = new Worker.Task(funcs[s[0]], s.Skip(1).ToList());
+                    var task = new Worker.Task(funcs[command], s.Skip(1).ToList());
                     requestQueue.Enqueue(task);
                 }
+                Console.WriteLine("Request accepted");
             }
 
-            while (returnQueue.Count != 0)
-            {
-                Console.WriteLine(returnQueue.Dequeue());
-            }
+            while (returnQueue.TryDequeue(out var result))
+                Console.WriteLine(result);
 
             Worker.Kill = true;
             

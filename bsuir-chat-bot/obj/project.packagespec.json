@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
+    "projectUniqueName": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
     "projectName": "bsuir-chat-bot",
-    "projectPath": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
-    "outputPath": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\obj\\",
+    "projectPath": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
+    "outputPath": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

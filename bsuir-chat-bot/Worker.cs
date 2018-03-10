@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -20,11 +21,11 @@ namespace bsuir_chat_bot
             }
         }
         
-        private static Queue<Task> _queue;
-        private static Queue<string> _returnQueue;
+        private static ConcurrentQueue<Task> _queue;
+        private static ConcurrentQueue<string> _returnQueue;
         public static bool Kill = false;
 
-        internal Worker(Queue<Task> queue, Queue<string> returnQueue)
+        internal Worker(ConcurrentQueue<Task> queue, ConcurrentQueue<string> returnQueue)
         {
             _queue = queue;
             _returnQueue = returnQueue;
@@ -34,17 +35,10 @@ namespace bsuir_chat_bot
         {
             while (!Kill)
             {
-                Task task = null;
-                lock (_queue)
-                    if (_queue.Count != 0)
-                        task = _queue.Dequeue();
-                if (task != null)
+                if (_queue.TryDequeue(out var task))
                 {
                     var returnValue = task.Function(task.Args);
-                    lock (_returnQueue)
-                    {
-                        _returnQueue.Enqueue(returnValue);
-                    }
+                    _returnQueue.Enqueue(returnValue);
                 }
                 else
                     Thread.Sleep(10);

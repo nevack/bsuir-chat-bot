@@ -4555,28 +4555,30 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\dimch\\.nuget\\packages\\": {},
+    "C:\\Users\\Eugene\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
+      "projectUniqueName": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
       "projectName": "bsuir-chat-bot",
-      "projectPath": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
-      "packagesPath": "C:\\Users\\dimch\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\dimch\\RiderProjects\\bsuir-chat-bot\\bsuir-chat-bot\\obj\\",
+      "projectPath": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\bsuir-chat-bot.csproj",
+      "packagesPath": "C:\\Users\\Eugene\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Eugene\\Desktop\\RANDOM SHITE\\Google-VK\\SharpPort\\bsuir-chat-bot\\bsuir-chat-bot\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\dimch\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Eugene\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
