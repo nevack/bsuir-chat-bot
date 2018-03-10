@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
@@ -13,6 +15,8 @@ namespace bsuir_chat_bot
 {
     class Program
     {
+        private const int NumberOfWorkerThreads = 4;
+        
         static void Main(string[] args)
         {
 //            var builder = new ConfigurationBuilder()
@@ -61,6 +65,7 @@ namespace bsuir_chat_bot
 
             var quote = new QuoteProvider("Fuhrer.json");
             var ping = new PingProvider();
+            var wait = new WaitProvider();
 
             foreach (var func in quote.Functions)
             {
@@ -72,16 +77,42 @@ namespace bsuir_chat_bot
                 funcs.Add(func.Key, func.Value);
             }
             
+            foreach (var func in wait.Functions)
+            {
+                funcs.Add(func.Key, func.Value);
+            }
+            
 //            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
 //            jsons.ForEach(Console.WriteLine);
-
+            
+            var requestQueue = new Queue<Worker.Task>();
+            var returnQueue = new Queue<string>();
+            var workersList = new List<Thread>();
+            
+            for (int i = 0; i < NumberOfWorkerThreads; i++)
+            {
+                var worker = new Worker(requestQueue, returnQueue);
+                var workerThread = new Thread(worker.Work);
+                workersList.Add(workerThread);
+                workerThread.Start();
+            }
+            
             string x;
             while (!string.IsNullOrEmpty(x = Console.ReadLine()))
             {
                 var s = x.Split(" ").ToList();
-                Console.WriteLine(funcs[s[0]](s.Skip(1).ToList()));
+                var task = new Worker.Task(funcs[s[0]], s.Skip(1).ToList());
+                requestQueue.Enqueue(task);
+                
+                Console.WriteLine("Request accepted");
             }
-            
+
+            while (returnQueue.Count != 0)
+            {
+                Console.WriteLine(returnQueue.Dequeue());
+            }
+
+            Worker.Kill = true;
 //            while (int.TryParse(Console.ReadLine(), out var x))
 //            {
 //                try
