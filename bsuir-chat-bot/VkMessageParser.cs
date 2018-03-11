@@ -7,7 +7,7 @@ namespace bsuir_chat_bot
 {
     public static class VkMessageParser
     {
-        private const int MESSAGE = 4;
+        private const int Message = 4;
 
         public static List<Message> ParseLongPollMessage(string content)
         {
@@ -16,7 +16,7 @@ namespace bsuir_chat_bot
             var messageList = new List<Message>();
             foreach (var update in responseDict["updates"])
             {
-                if (update[0] == MESSAGE)
+                if (update[0] == Message)
                 {
                     var parsed = new Message
                     {
