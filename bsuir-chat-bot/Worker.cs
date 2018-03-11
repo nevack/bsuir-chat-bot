@@ -3,30 +3,21 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using VkNet.Model;
 
 namespace bsuir_chat_bot
 {
     
     public class Worker
-    {
-        public class Task
-        {
-            public Func<List<string>, string> Function;
-            public List<string> Args;
-
-            public Task(Func<List<string>, string> func, List<string> list)
-            {
-                Function = func;
-                Args = list;
-            }
-        }
-        
-        private static ConcurrentQueue<Task> _queue;
+    {        
+        private static ConcurrentQueue<Command> _queue;
+        private static ConcurrentQueue<Response> _outputQueue;
         public static bool Kill = false;
 
-        internal Worker(ConcurrentQueue<Task> queue)
+        internal Worker(ConcurrentQueue<Command> queue, ConcurrentQueue<Response> outputQueue)
         {
             _queue = queue;
+            _outputQueue = outputQueue;
         }
 
         public void Work()
@@ -35,7 +26,8 @@ namespace bsuir_chat_bot
             {
                 if (_queue.TryDequeue(out var task))
                 {
-                    var returnValue = task.Function(task.Args);
+                    string returnValue = task.Function(task.Args);
+                    _outputQueue.Enqueue(new Response(task.Message, returnValue));
                     Console.WriteLine(returnValue);
                 }
                 else
