@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using VkNet.Model;
 
 namespace bsuir_chat_bot
 {
@@ -15,26 +17,19 @@ namespace bsuir_chat_bot
                 if (update[0] == 4)
                 {
                     Message parsed = new Message();
-                    parsed.Text = update[5];
-                    parsed.MessageId = update[1].ToString();
-                    parsed.Date = update[4];
+                    parsed.Body = update[5];
+                    parsed.Id = update[1];
+                    parsed.Date = DateTimeOffset.FromUnixTimeSeconds((long)update[4]).UtcDateTime;
                     if (update[3] > 2000000000)
                     {
                         parsed.ChatId = (update[3] - 2000000000).ToString();
-                        parsed.IsChat = true;
-                        parsed.AuthorId = update[6]["from"];
+                        parsed.OwnerId = update[6]["from"];
                         
                     }
                     else
                     {
-                        parsed.IsChat = false;
-                        parsed.ChatId = null;
-                        parsed.AuthorId = update[3];
+                        parsed.OwnerId = update[3];
                     }
-
-                    if (update.Count == 8)
-                        for (int i = 0; i < update[7].Count; i += 2)
-                            parsed.Attachments.Add(update[7][i]+update[7][i+1]);
                     messageList.Add(parsed);
                 }
             }

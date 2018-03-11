@@ -95,7 +95,6 @@ namespace bsuir_chat_bot
             string x = "kek";
             long timestamp = -1;
             var server = api.Messages.GetLongPollServer();
-            
             while (!string.IsNullOrEmpty(x))
             {
                 var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
@@ -110,7 +109,7 @@ namespace bsuir_chat_bot
                 if (messages == null) continue;
                 foreach (var message in messages)
                 {
-                    var s = message.Text.Split(" ").ToList();
+                    var s = message.Body.Split(" ").ToList();
                 
                     var match = botCommandRegex.Match(s[0]);
 
