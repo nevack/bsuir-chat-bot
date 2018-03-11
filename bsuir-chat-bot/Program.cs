@@ -82,11 +82,10 @@ namespace bsuir_chat_bot
 //            jsons.ForEach(Console.WriteLine);
             
             var requestQueue = new ConcurrentQueue<Worker.Task>();
-            var returnQueue = new ConcurrentQueue<string>();
             
             for (int i = 0; i < NumberOfWorkerThreads; i++)
             {
-                var worker = new Worker(requestQueue, returnQueue);
+                var worker = new Worker(requestQueue);
                 var workerThread = new Thread(worker.Work);
                 workerThread.Start();
             }
@@ -102,46 +101,28 @@ namespace bsuir_chat_bot
                 var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
                 
                 ts = responseDict["ts"];
-                
-                if (!responseDict.Keys.Contains("updates")) continue;
-                bool isAMessage = false;
-                foreach (var update in responseDict["updates"])
+
+                var messages = VkMessageParser.ParseLongPollMessage(responseString);
+                if (messages == null) continue;
+                foreach (var message in messages)
                 {
-                    if (update[0] == 4)
+                    var s = message.Text.Split(" ").ToList();
+                
+                    var match = botCommandRegex.Match(s[0]);
+
+                    if (!match.Success) continue;
+                
+                    var command = match.Groups[1].Value;
+
+                    if (funcs.ContainsKey(command))
                     {
-                        x = update[5];
-                        isAMessage = true;
-                        break;
+                        var task = new Worker.Task(funcs[command], s.Skip(1).ToList());
+                        requestQueue.Enqueue(task);
                     }
+                    Console.WriteLine("Request accepted");
                 }
-                if (!isAMessage) continue;
-                var s = x.Split(" ").ToList();
-                
-                var match = botCommandRegex.Match(s[0]);
 
-                if (!match.Success) continue;
-                
-                var command = match.Groups[1].Value;
-
-                if (funcs.ContainsKey(command))
-                {
-                    var task = new Worker.Task(funcs[command], s.Skip(1).ToList());
-                    requestQueue.Enqueue(task);
-                }
-                Console.WriteLine("Request accepted");
             }
-            
-//            while (int.TryParse(Console.ReadLine(), out var x))
-//            {
-//                try
-//                {
-//                    Console.WriteLine(quote[x].Text);
-//                }
-//                catch (ArgumentOutOfRangeException e)
-//                {
-//                    Console.WriteLine("Столько цитат ещё не добавлено!");
-//                }
-//            }
             
             Console.ReadKey();
             Worker.Kill = true;

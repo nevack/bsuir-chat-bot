@@ -22,13 +22,11 @@ namespace bsuir_chat_bot
         }
         
         private static ConcurrentQueue<Task> _queue;
-        private static ConcurrentQueue<string> _returnQueue;
         public static bool Kill = false;
 
-        internal Worker(ConcurrentQueue<Task> queue, ConcurrentQueue<string> returnQueue)
+        internal Worker(ConcurrentQueue<Task> queue)
         {
             _queue = queue;
-            _returnQueue = returnQueue;
         }
 
         public void Work()
@@ -39,7 +37,6 @@ namespace bsuir_chat_bot
                 {
                     var returnValue = task.Function(task.Args);
                     Console.WriteLine(returnValue);
-                    _returnQueue.Enqueue(returnValue);
                 }
                 else
                     Thread.Sleep(10);
