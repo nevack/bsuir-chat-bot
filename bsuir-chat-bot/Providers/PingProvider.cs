@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace bsuir_chat_bot
 {
@@ -11,9 +13,24 @@ namespace bsuir_chat_bot
         {
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
-                {"ping", list => "pong"},
+                {"ping", Ping},
                 {"pong", list => "ping"}
             };
+        }
+
+        private string Ping(List<string> args)
+        {
+            var pingSender = new Ping ();
+            var reply = pingSender.Send("87.240.129.71");
+
+            var message = "pong 🏓";
+
+            if (reply != null && reply.Status == IPStatus.Success)
+            {
+                message += $" -- {reply.RoundtripTime * 2}ms";
+            }
+
+            return message;
         }
     }
 }

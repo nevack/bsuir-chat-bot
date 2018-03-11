@@ -9,12 +9,14 @@ namespace bsuir_chat_bot
         public Message Message;
         public Func<List<string>, string> Function;
         public List<string> Args;
+        public DateTime RecievedTime { get; }
         
         public Command(Message message, Func<List<string>, string> function, List<string> args)
         {
             Args = args;
             Function = function;
             Message = message;
+            RecievedTime = DateTime.Now;
         }
     }
 

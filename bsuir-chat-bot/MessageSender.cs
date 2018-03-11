@@ -31,9 +31,11 @@ namespace bsuir_chat_bot
                 {
                     _api.Messages.Send(new MessagesSendParams
                     {
-                        PeerId = mess.InputMessage.ChatId == null?mess.InputMessage.FromId:2000000000+mess.InputMessage.ChatId,
+                        PeerId = mess.InputMessage.ChatId?.ToPeerId() ?? mess.InputMessage.FromId,
                         Message = mess.FuncOutput
                     });
+                
+                    Thread.Sleep(200);
                 }
                 else
                     Thread.Sleep(10);

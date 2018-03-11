@@ -15,6 +15,7 @@ using VkNet.Exception;
 using VkNet.Model.RequestParams;
 using System.Net.Http;
 using Newtonsoft.Json;
+using NLog;
 using VkNet.Model;
 
 namespace bsuir_chat_bot
@@ -37,13 +38,13 @@ namespace bsuir_chat_bot
 
             var configuration = builder.Build();
 
-            Console.WriteLine($"{configuration["appid"]}");
-            Console.WriteLine($"{configuration["login"]}");
-            Console.WriteLine($"{configuration["password"]}");
-            Console.WriteLine($"{configuration["accesstoken"]}");
-            Console.WriteLine($"{configuration["shortenerapikey"]}");
+//            Console.WriteLine($"{configuration["appid"]}");
+//            Console.WriteLine($"{configuration["login"]}");
+//            Console.WriteLine($"{configuration["password"]}");
+//            Console.WriteLine($"{configuration["accesstoken"]}");
+//            Console.WriteLine($"{configuration["shortenerapikey"]}");
             
-            var api = new VkApi(logger: null);
+            var api = new VkApi(new NullLogger(new LogFactory()));
 	
             api.Authorize(new ApiAuthParams
             {
