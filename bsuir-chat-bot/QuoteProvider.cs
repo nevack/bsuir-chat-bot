@@ -40,7 +40,7 @@ namespace bsuir_chat_bot
 
             var quote = _quotedict.Quotes[index];
             
-            return $"{quote.Text}<br> @ [id{_quotedict.AuthorId}|{_quotedict.AuthorName}]";
+            return $"{quote.Text}<br> -- [id{_quotedict.AuthorId}|{_quotedict.AuthorName}] [{index}]";
         }
 
         public Quote this[int index] => GetQuote(index);
