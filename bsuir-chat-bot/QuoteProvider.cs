@@ -28,6 +28,14 @@ namespace bsuir_chat_bot
             
             return _quotedict.Quotes[index];
         }
+        
+        private string GetQuoteString(int index)
+        {
+            if (index < 0) index = _quotedict.Quotes.Count + index;
+
+            var quote = _quotedict.Quotes[index];
+            return $"{quote.Text} @ {_quotedict.AuthorName}";
+        }
 
         public Quote this[int index] => GetQuote(index);
 

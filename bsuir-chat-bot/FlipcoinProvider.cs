@@ -20,13 +20,6 @@ namespace bsuir_chat_bot
             };
         }
 
-        private string GetUptime(List<string> args)
-        {
-            var curTime = DateTime.Now;
-
-            var uptime = curTime - Program.StartTime;
-
-            return uptime.ToString(@"d\.hh\:mm\:ss");
-        }
+        private string GetUptime(List<string> args) => Program.GetUptime();
     }
 }

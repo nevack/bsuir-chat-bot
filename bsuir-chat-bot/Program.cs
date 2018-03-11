@@ -23,6 +23,8 @@ namespace bsuir_chat_bot
         public static readonly HttpClient Client = new HttpClient();
         public static DateTime StartTime;
         private const int NumberOfWorkerThreads = 4;
+
+        public static string GetUptime() => (DateTime.Now - Program.StartTime).ToString(@"d\.hh\:mm\:ss");
         
         static void Main(string[] args)
         {
@@ -40,7 +42,7 @@ namespace bsuir_chat_bot
             Console.WriteLine($"{configuration["accesstoken"]}");
             Console.WriteLine($"{configuration["shortenerapikey"]}");
             
-            var api = new VkApi(null);
+            var api = new VkApi(logger: null);
 	
             api.Authorize(new ApiAuthParams
             {
@@ -92,16 +94,18 @@ namespace bsuir_chat_bot
             }
             
             string x = "kek";
-            long ts = -1;
+            long timestamp = -1;
             var server = api.Messages.GetLongPollServer();
+            
             while (!string.IsNullOrEmpty(x))
             {
-                var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={ts}&wait=25&mode=2&version=2", null);
+                var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
+                var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
                 response.Wait();
                 var responseString = response.Result.Content.ReadAsStringAsync().Result;
                 var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
                 
-                ts = responseDict["ts"];
+                timestamp = responseDict["ts"];
                 
                 if (!responseDict.Keys.Contains("updates")) continue;
                 bool isAMessage = false;
