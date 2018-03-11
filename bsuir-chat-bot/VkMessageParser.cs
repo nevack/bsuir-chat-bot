@@ -42,14 +42,8 @@ namespace bsuir_chat_bot
             return messageList;
         }
 
-        public static long ToPeerId(this long id)
-        {
-            return id + 2000000000;
-        }
+        public static long ToPeerId(this long id) => id + 2_000_000_000;
 
-        public static long ToChatId(this long id)
-        {
-            return id - 2000000000;
-        }
+        public static long ToChatId(this long id) => id - 2_000_000_000;
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using VkNet;
+using VkNet.Exception;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
 
@@ -25,20 +26,40 @@ namespace bsuir_chat_bot
 
         public void Work()
         {
+            var sleeptime = 200;
+            const int checksPerSecond = 100;
             while (!Kill)
             {
                 if (_outputQueue.TryDequeue(out var mess))
                 {
-                    _api.Messages.Send(new MessagesSendParams
+                    try
                     {
-                        PeerId = mess.InputMessage.ChatId?.ToPeerId() ?? mess.InputMessage.FromId,
-                        Message = mess.FuncOutput
-                    });
-                
-                    Thread.Sleep(200);
+                        _api.Messages.Send(new MessagesSendParams
+                        {
+                            PeerId = mess.InputMessage.ChatId?.ToPeerId() ?? mess.InputMessage.FromId,
+                            Message = mess.FuncOutput
+                        });
+
+                        if (sleeptime > 200) sleeptime /= 2;
+                    }
+                    catch (CaptchaNeededException)
+                    {    
+                        Thread.Sleep(60 /*seconds*/ * 1000);
+                        _outputQueue.Enqueue(mess);
+                    }
+                    catch (Exception e)
+                    {
+                        sleeptime *= sleeptime < 6_400 
+                            ? 2 
+                            : throw e;
+                        _outputQueue.Enqueue(mess);
+                    }
+                    
+                    Console.WriteLine($"Sleep: {sleeptime}ms");
+                    Thread.Sleep(sleeptime);
                 }
                 else
-                    Thread.Sleep(10);
+                    Thread.Sleep(1000 / checksPerSecond);
             }
         }
     }
