@@ -15,6 +15,7 @@ using VkNet.Exception;
 using VkNet.Model.RequestParams;
 using System.Net.Http;
 using Newtonsoft.Json;
+using VkNet.Model;
 
 namespace bsuir_chat_bot
 {
@@ -83,19 +84,23 @@ namespace bsuir_chat_bot
 //            var jsons = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.json").ToList();
 //            jsons.ForEach(Console.WriteLine);
             
-            var requestQueue = new ConcurrentQueue<Worker.Task>();
+            var requestQueue = new ConcurrentQueue<Command>();
+            var outputQueue = new ConcurrentQueue<Response>();
             
             for (int i = 0; i < NumberOfWorkerThreads; i++)
             {
-                var worker = new Worker(requestQueue);
+                var worker = new Worker(requestQueue, outputQueue);
                 var workerThread = new Thread(worker.Work);
                 workerThread.Start();
             }
             
-            string x = "kek";
+            var sender = new MessageSender(outputQueue, api);
+            var senderThread = new Thread(sender.Work);
+            senderThread.Start();
+            
             long timestamp = -1;
             var server = api.Messages.GetLongPollServer();
-            while (!string.IsNullOrEmpty(x))
+            while (true)
             {
                 var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
                 var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
@@ -119,16 +124,12 @@ namespace bsuir_chat_bot
 
                     if (funcs.ContainsKey(command))
                     {
-                        var task = new Worker.Task(funcs[command], s.Skip(1).ToList());
+                        var task = new Command(message, funcs[command], s.Skip(1).ToList());
                         requestQueue.Enqueue(task);
                     }
                     Console.WriteLine("Request accepted");
                 }
-
             }
-            
-            Console.ReadKey();
-            Worker.Kill = true;
         }
     }
 }

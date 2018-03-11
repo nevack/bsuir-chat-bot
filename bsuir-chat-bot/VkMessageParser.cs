@@ -23,17 +23,13 @@ namespace bsuir_chat_bot
                     if (update[3] > 2000000000)
                     {
                         parsed.ChatId = (update[3] - 2000000000).ToString();
-                        parsed.OwnerId = update[6]["from"];
-                        
+                        parsed.FromId = update[6]["from"];
                     }
                     else
-                    {
-                        parsed.OwnerId = update[3];
-                    }
+                        parsed.FromId = update[3];
                     messageList.Add(parsed);
                 }
             }
-
             return messageList;
         }
     }
