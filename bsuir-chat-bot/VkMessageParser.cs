@@ -22,7 +22,7 @@ namespace bsuir_chat_bot
                     parsed.Date = DateTimeOffset.FromUnixTimeSeconds((long)update[4]).UtcDateTime;
                     if (update[3] > 2000000000)
                     {
-                        parsed.ChatId = (update[3] - 2000000000).ToString();
+                        parsed.ChatId = (update[3] - 2000000000);
                         parsed.FromId = update[6]["from"];
                     }
                     else
