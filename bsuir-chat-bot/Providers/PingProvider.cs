@@ -14,7 +14,8 @@ namespace bsuir_chat_bot
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
                 {"ping", Ping},
-                {"pong", list => "ping"}
+                {"pong", list => "ping"},
+                {"pAnG", list => "HHЫЬЫТолыо!!тЛылЬЬ;27~~&@!"}
             };
         }
 
