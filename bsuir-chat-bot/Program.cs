@@ -108,8 +108,16 @@ namespace bsuir_chat_bot
                 response.Wait();
                 var responseString = response.Result.Content.ReadAsStringAsync().Result;
                 var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
-                
-                timestamp = responseDict["ts"];
+
+                try
+                {
+                    timestamp = responseDict["ts"];
+                }
+                catch (KeyNotFoundException)
+                {
+                    server = api.Messages.GetLongPollServer();
+                    continue;
+                }
 
                 var messages = VkMessageParser.ParseLongPollMessage(responseString);
                 if (messages == null) continue;
