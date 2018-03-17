@@ -15,7 +15,7 @@ namespace bsuir_chat_bot
             {
                 {"ping", Ping},
                 {"pong", list => "ping"},
-                {"pAnG", list => "HHЫЬЫТолыо!!тЛылЬЬ;27~~&@!"}
+                {"pang", list => "HHЫЬЫТолыо!!тЛылЬЬ;27~~&@!"}
             };
         }
 

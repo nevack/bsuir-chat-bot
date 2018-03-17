@@ -88,7 +88,7 @@ namespace bsuir_chat_bot
             var requestQueue = new ConcurrentQueue<Command>();
             var outputQueue = new ConcurrentQueue<Response>();
             
-            for (int i = 0; i < NumberOfWorkerThreads; i++)
+            for (var i = 0; i < NumberOfWorkerThreads; i++)
             {
                 var worker = new Worker(requestQueue, outputQueue);
                 var workerThread = new Thread(worker.Work);
@@ -101,6 +101,7 @@ namespace bsuir_chat_bot
             
             long timestamp = -1;
             var server = api.Messages.GetLongPollServer();
+            
             while (true)
             {
                 var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
@@ -129,7 +130,7 @@ namespace bsuir_chat_bot
 
                     if (!match.Success) continue;
                 
-                    var command = match.Groups[1].Value;
+                    var command = match.Groups[1].Value.ToLower();
 
                     if (funcs.ContainsKey(command))
                     {
