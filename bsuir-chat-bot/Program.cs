@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
-using NLog.Targets;
 using VkNet;
 using VkNet.Enums.Filters;
-using VkNet.Exception;
-using VkNet.Model.RequestParams;
 using System.Net.Http;
+using NCalc;
 using Newtonsoft.Json;
 using NLog;
-using VkNet.Model;
+using QRCoder;
 
 namespace bsuir_chat_bot
 {
@@ -31,6 +28,14 @@ namespace bsuir_chat_bot
         static void Main(string[] args)
         {
             StartTime = DateTime.Now;
+            
+//            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+//            QRCodeData qrCodeData = qrGenerator.CreateQrCode("Pisarchik sosatb", QRCodeGenerator.ECCLevel.Q);
+//            QRCode qrCode = new QRCode(qrCodeData);
+//            Bitmap qrCodeImage = qrCode.GetGraphic(10);
+//            qrCodeImage.Save("gay.png");
+            
+            Console.WriteLine("Hello" == new Expression(@"'Hello'").Evaluate().ToString());
             
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
