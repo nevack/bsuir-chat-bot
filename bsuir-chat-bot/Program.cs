@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,58 +9,63 @@ using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
 using System.Net.Http;
-using NCalc;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
 using QRCoder;
 
 namespace bsuir_chat_bot
 {
-    class Program
+    internal static class Program
     {
-        public static readonly HttpClient Client = new HttpClient();
-        public static DateTime StartTime;
+        private static readonly HttpClient Client = new HttpClient();
+        private static DateTime _startTime;
         private const int NumberOfWorkerThreads = 4;
 
-        public static string GetUptime() => (DateTime.Now - Program.StartTime).ToString(@"d\.hh\:mm\:ss");
-        
-        static void Main(string[] args)
+        public static string GetUptime() => (DateTime.Now - _startTime).ToString(@"d\.hh\:mm\:ss");
+
+        private static void Main()
         {
-            StartTime = DateTime.Now;
+            _startTime = DateTime.Now;
             
-//            QRCodeGenerator qrGenerator = new QRCodeGenerator();
-//            QRCodeData qrCodeData = qrGenerator.CreateQrCode("Pisarchik sosatb", QRCodeGenerator.ECCLevel.Q);
-//            QRCode qrCode = new QRCode(qrCodeData);
-//            Bitmap qrCodeImage = qrCode.GetGraphic(10);
-//            qrCodeImage.Save("gay.png");
-            
-            Console.WriteLine("Hello" == new Expression(@"'Hello'").Evaluate().ToString());
+            QrCodeGenImage(_startTime.ToLongDateString(), "date.png");
             
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("botconfig.json");
 
             var configuration = builder.Build();
-
-//            Console.WriteLine($"{configuration["appid"]}");
-//            Console.WriteLine($"{configuration["login"]}");
-//            Console.WriteLine($"{configuration["password"]}");
-//            Console.WriteLine($"{configuration["accesstoken"]}");
-//            Console.WriteLine($"{configuration["shortenerapikey"]}");
             
             var api = new VkApi(new NullLogger(new LogFactory()));
-	
-            api.Authorize(new ApiAuthParams
+            
+            var token = configuration["token"];
+
+            var auth = new ApiAuthParams
             {
                 ApplicationId = ulong.Parse(configuration["appid"]),
-                //Login = configuration["login"],
-                //Password = configuration["password"],
-                AccessToken = configuration["accesstoken"],
                 Settings = Settings.All
-            });
+            };
 
-            configuration["accesstoken"] = api.Token;
-            Console.WriteLine(api.Token);
+
+            if (token != null)
+            {
+                auth.AccessToken = token;
+            }
+            else
+            {
+                auth.Login = configuration["login"];
+                auth.Password = configuration["password"];
+            }
+            
+            api.Authorize(auth);
+
+            if (!api.IsAuthorized)
+            {
+                Console.WriteLine("Failed to log in with credentials: ");
+                PrintCredentials(configuration);
+            }
+
+            Console.WriteLine($"Started with token:\n{api.Token}\n");
             
             var botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
@@ -120,9 +124,10 @@ namespace bsuir_chat_bot
             
             while (true)
             {
-                var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
+//                var longpolluri = $"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2";
                 var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
                 response.Wait();
+                
                 var responseString = response.Result.Content.ReadAsStringAsync().Result;
                 var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
 
@@ -138,6 +143,7 @@ namespace bsuir_chat_bot
 
                 var messages = VkMessageParser.ParseLongPollMessage(responseString);
                 if (messages == null) continue;
+                
                 foreach (var message in messages)
                 {
                     var s = message.Body.Split(" ").ToList();
@@ -152,10 +158,28 @@ namespace bsuir_chat_bot
                     {
                         var task = new Command(message, funcs[command], s.Skip(1).ToList());
                         requestQueue.Enqueue(task);
+                        Console.WriteLine("Request accepted");
                     }
-                    Console.WriteLine("Request accepted");
                 }
             }
+        }
+
+        private static void PrintCredentials(IConfiguration configuration)
+        {
+            Console.WriteLine($"{configuration["appid"]}");
+            Console.WriteLine($"{configuration["login"]}");
+            Console.WriteLine($"{configuration["password"]}");
+            Console.WriteLine($"{configuration["accesstoken"]}");
+            // Console.WriteLine($"{configuration["shortenerapikey"]}");
+        }
+
+        private static async void QrCodeGenImage(string text, string fileName)
+        {
+            var qrGenerator = new QRCodeGenerator();
+            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+            var qrCode = new QRCode(qrCodeData);
+            var qrCodeImage = qrCode.GetGraphic(50);
+            await Task.Run(() => qrCodeImage.Save(fileName));
         }
     }
 }
