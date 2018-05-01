@@ -8,31 +8,36 @@ namespace bsuir_chat_bot
     public class MathProvider: IBotProvider
     {
         public Dictionary<string, Func<List<string>, string>> Functions { get; }
-        
+
         public MathProvider()
         {
+            var parameters = new Dictionary<string, object>()
+            {
+                ["Pi"] = Math.PI,
+                ["pi"] = Math.PI,
+                ["E"] = Math.E,
+                ["e"] = Math.E
+            };
+            
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
                 {"calc", list =>
                     {
-                        var expr = new Expression(string.Join(' ', list));
-                        expr.Parameters["Pi"] = Math.PI;
-                        expr.Parameters["pi"] = Math.PI;
-                        expr.Parameters["E"] = Math.E;
-                        expr.Parameters["e"] = Math.E;
+                        var expr = new Expression(string.Join(' ', list)) {Parameters = parameters};
 
-                        Action<string, FunctionArgs> repeat = null;
-                        repeat = delegate(string name, FunctionArgs args)
+
+
+                        void Repeat(string name, FunctionArgs args)
                         {
                             if (name == "Repeat")
                             {
                                 var ex = args.Parameters[0];
-                                ex.EvaluateFunction += (ss, a) => repeat(ss, a);
-                                
+                                ex.EvaluateFunction += Repeat;
+
                                 args.Result = string.Concat(Enumerable.Repeat(ex.Evaluate().ToString(),
                                     (int) args.Parameters[1].Evaluate()));
                             }
-                        };
+                        }
 
 //                        expr.EvaluateFunction += delegate(string name, FunctionArgs args)
 //                        {
@@ -41,7 +46,7 @@ namespace bsuir_chat_bot
 //                                    (int) args.Parameters[1].Evaluate()));
 //                        };
                         
-                        expr.EvaluateFunction += (name, args) => repeat(name, args);
+                        expr.EvaluateFunction += Repeat;
 
                         var s = "Error! ";
                         try
