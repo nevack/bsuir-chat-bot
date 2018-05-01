@@ -37,7 +37,7 @@ namespace bsuir_chat_bot
                         _api.Messages.Send(new MessagesSendParams
                         {
                             PeerId = mess.InputMessage.ChatId?.ToPeerId() ?? mess.InputMessage.FromId,
-                            Message = mess.FuncOutput
+                            Message = $"{mess.FuncOutput} [id{mess.InputMessage.FromId}|©]"
                         });
 
                         if (sleeptime > 200) sleeptime /= 2;

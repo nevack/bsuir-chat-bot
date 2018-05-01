@@ -12,7 +12,18 @@ namespace bsuir_chat_bot
         {
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
-                {"wait", list => Wait(Convert.ToInt32(list[0]))}
+                {"wait", list => Wait(Convert.ToInt32(list[0]))},
+                {"stop", list =>
+                    {
+                        var t = new Thread(() =>
+                        {
+                            Thread.Sleep(1000);
+                            Environment.Exit(2);
+                        });
+                        t.Start();
+                        return "Bye";
+                    }
+                }
             };
         }
         

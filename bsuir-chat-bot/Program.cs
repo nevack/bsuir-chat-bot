@@ -49,9 +49,14 @@ namespace bsuir_chat_bot
             api.Authorize(new ApiAuthParams
             {
                 ApplicationId = ulong.Parse(configuration["appid"]),
+                //Login = configuration["login"],
+                //Password = configuration["password"],
                 AccessToken = configuration["accesstoken"],
                 Settings = Settings.All
             });
+
+            configuration["accesstoken"] = api.Token;
+            Console.WriteLine(api.Token);
             
             var botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
@@ -61,6 +66,7 @@ namespace bsuir_chat_bot
             var ping = new PingProvider();
             var wait = new WaitProvider();
             var flipcoin = new FlipcoinProvider();
+            var math = new MathProvider();
             
             foreach (var func in quote.Functions)
             {
@@ -78,6 +84,11 @@ namespace bsuir_chat_bot
             }
             
             foreach (var func in wait.Functions)
+            {
+                funcs[func.Key] = func.Value;
+            }
+            
+            foreach (var func in math.Functions)
             {
                 funcs[func.Key] = func.Value;
             }
