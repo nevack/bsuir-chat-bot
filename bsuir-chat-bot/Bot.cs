@@ -92,18 +92,64 @@ namespace bsuir_chat_bot
                 ["ping"] = new PingProvider(),
                 ["wait"] = new WaitProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
+                ["reddit"] = new RedditProvider(),
                 ["math"] = new MathProvider()
             };
 
             foreach (var func in system.Functions)
             {
                 Functions[func.Key] = func.Value;
-            }            
+            }
+
+            var modules = configuration.GetSection("modules").GetChildren().Select(c => c.Value).ToArray();
+
+            foreach (var module in modules)
+            {
+                foreach (var func in Providers[module].Functions)
+                {            
+                    Functions[func.Key] = func.Value;
+                }
+            }
             
             Requests = new ConcurrentQueue<Command>();
             Responses = new ConcurrentQueue<Response>();
         }
+
+        public void LoadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                LoadModule(name);
+            }
+        }
         
+        public void UnloadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                UnloadModule(name);
+            }
+        }
+
+        public void LoadModule(string name)
+        {
+            if (!Providers.ContainsKey(name)) return;
+            
+            foreach (var function in Providers[name].Functions)
+            {
+                Functions.Add(function.Key, function.Value);
+            }
+        }
+
+        public void UnloadModule(string name)
+        {
+            if (!Providers.ContainsKey(name)) return;
+            
+            foreach (var function in Providers[name].Functions.Keys)
+            {
+                Functions.Remove(function);
+            }
+        }
     
         public void Start()
         {

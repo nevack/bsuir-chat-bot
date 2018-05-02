@@ -10,10 +10,8 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    
     public class MessageSender
     {
-
         private static ConcurrentQueue<Response> _outputQueue;
         private static VkApi _api;
         public static bool Kill = false;

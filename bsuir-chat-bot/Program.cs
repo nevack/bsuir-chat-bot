@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-
-namespace bsuir_chat_bot
+﻿namespace bsuir_chat_bot
 {
     internal static class Program
     {
@@ -10,7 +6,6 @@ namespace bsuir_chat_bot
         {
             var bot = new Bot();
             bot.Start();
-            
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -65,13 +66,30 @@ namespace bsuir_chat_bot
 
         private string LoadModule(List<string> names)
         {
+            
             var s = new StringBuilder();
             
-            foreach (var name in names)
+            if (names.Count == 1 && names[0].ToLower() == "all")
+            {
+                foreach (var name in _bot.Providers.Keys)
+                {
+
+                    foreach (var function in _bot.Providers[name].Functions)
+                    {
+                        _bot.Functions[function.Key] = function.Value;
+                    }
+
+                    s.AppendLine($"Module \"{name}\" loaded");
+                }
+
+                return s.ToString();
+            }
+            
+            foreach (var name in names.Select(name => name.ToLower()))
             {
                 if (!_bot.Providers.ContainsKey(name))
                 {
-                    s.AppendLine($"Module \"{name} not found");
+                    s.AppendLine($"Module \"{name}\" not found");
                     continue;
                 }
 
@@ -80,7 +98,7 @@ namespace bsuir_chat_bot
                     _bot.Functions.Add(function.Key, function.Value);
                 }
 
-                s.AppendLine($"Module \"{name} loaded");
+                s.AppendLine($"Module \"{name}\" loaded");
             }
 
             return s.ToString();
@@ -90,11 +108,23 @@ namespace bsuir_chat_bot
         {
             var s = new StringBuilder();
             
-            foreach (var name in names)
+            if (names.Count == 1 && names[0].ToLower() == "all")
+            {                
+                foreach (var name in _bot.Providers.Keys)
+                {
+                    s.AppendLine($"Module \"{name}\" unloaded");
+                }
+                
+                _bot.Functions.Clear();
+
+                return s.ToString();
+            }
+            
+            foreach (var name in names.Select(name => name.ToLower()))
             {
                 if (!_bot.Providers.ContainsKey(name))
                 {
-                    s.AppendLine($"Module \"{name} not found");
+                    s.AppendLine($"Module \"{name}\" not found");
                     continue;
                 }
 
@@ -103,7 +133,7 @@ namespace bsuir_chat_bot
                     _bot.Functions.Remove(function.Key);
                 }
 
-                s.AppendLine($"Module \"{name} unloaded");
+                s.AppendLine($"Module \"{name}\" unloaded");
             }
 
             return s.ToString();
