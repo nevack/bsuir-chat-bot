@@ -88,6 +88,7 @@ namespace bsuir_chat_bot
 
             Providers = new Dictionary<string, IBotProvider>
             {
+                ["system"] = new SystemProvider(this),
                 ["quote"] = new QuoteProvider("Fuhrer.json"),
                 ["ping"] = new PingProvider(),
                 ["wait"] = new WaitProvider(),
@@ -131,24 +132,30 @@ namespace bsuir_chat_bot
             }
         }
 
-        public void LoadModule(string name)
+        public bool LoadModule(string name)
         {
-            if (!Providers.ContainsKey(name)) return;
+            if (!Providers.ContainsKey(name)) return false;
             
             foreach (var function in Providers[name].Functions)
             {
-                Functions.Add(function.Key, function.Value);
+                Functions.TryAdd(function.Key, function.Value);
             }
+
+            return true;
         }
 
-        public void UnloadModule(string name)
+        public bool UnloadModule(string name)
         {
-            if (!Providers.ContainsKey(name)) return;
+            if (!Providers.ContainsKey(name)) return false;
+
+            if (name == "system") return false;
             
             foreach (var function in Providers[name].Functions.Keys)
             {
-                Functions.Remove(function);
+                        Functions.Remove(function);
             }
+
+            return true;
         }
     
         public void Start()

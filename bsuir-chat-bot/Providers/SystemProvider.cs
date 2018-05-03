@@ -66,39 +66,18 @@ namespace bsuir_chat_bot
 
         private string LoadModule(List<string> names)
         {
+            if (names.Count == 1 && names[0].ToLower() == "all")
+            {
+                _bot.LoadAll();
+                return "All modules were loaded";
+            }
             
             var s = new StringBuilder();
             
-            if (names.Count == 1 && names[0].ToLower() == "all")
-            {
-                foreach (var name in _bot.Providers.Keys)
-                {
-
-                    foreach (var function in _bot.Providers[name].Functions)
-                    {
-                        _bot.Functions[function.Key] = function.Value;
-                    }
-
-                    s.AppendLine($"Module \"{name}\" loaded");
-                }
-
-                return s.ToString();
-            }
-            
             foreach (var name in names.Select(name => name.ToLower()))
             {
-                if (!_bot.Providers.ContainsKey(name))
-                {
-                    s.AppendLine($"Module \"{name}\" not found");
-                    continue;
-                }
-
-                foreach (var function in _bot.Providers[name].Functions)
-                {
-                    _bot.Functions.Add(function.Key, function.Value);
-                }
-
-                s.AppendLine($"Module \"{name}\" loaded");
+                s.Append($"Module \"{name}\" was ");
+                s.AppendLine(_bot.LoadModule(name) ? "loaded" : "not loaded");
             }
 
             return s.ToString();
@@ -106,34 +85,19 @@ namespace bsuir_chat_bot
         
         private string UnloadModule(List<string> names)
         {
-            var s = new StringBuilder();
-            
             if (names.Count == 1 && names[0].ToLower() == "all")
-            {                
-                foreach (var name in _bot.Providers.Keys)
-                {
-                    s.AppendLine($"Module \"{name}\" unloaded");
-                }
-                
-                _bot.Functions.Clear();
+            {     
+                _bot.UnloadAll();
 
-                return s.ToString();
+                return "All modules were unloaded";
             }
+            
+            var s = new StringBuilder();
             
             foreach (var name in names.Select(name => name.ToLower()))
             {
-                if (!_bot.Providers.ContainsKey(name))
-                {
-                    s.AppendLine($"Module \"{name}\" not found");
-                    continue;
-                }
-
-                foreach (var function in _bot.Providers[name].Functions)
-                {
-                    _bot.Functions.Remove(function.Key);
-                }
-
-                s.AppendLine($"Module \"{name}\" unloaded");
+                s.Append($"Module \"{name}\" was ");
+                s.AppendLine(_bot.UnloadModule(name) ? "unloaded" : "not unloaded");
             }
 
             return s.ToString();
