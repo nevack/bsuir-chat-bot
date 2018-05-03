@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using VkNet;
 using VkNet.Model;
 
 namespace bsuir_chat_bot
@@ -9,15 +11,21 @@ namespace bsuir_chat_bot
     {
         private const int Message = 4;
 
-        public static List<Message> ParseLongPollMessage(string content)
+        public static List<Message> ParseLongPollMessage(this VkApi api,  string content)
         {
             var responseDict = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(content);
             if (!responseDict.ContainsKey("updates")) return null;
-            var messageList = new List<Message>();
+            var messageList = new List<VkNet.Model.Message>();
             foreach (var update in responseDict["updates"])
             {
                 if (update[0] == Message)
                 {
+                    if (update[6].ContainsKey("fwd"))
+                    {
+                        messageList.Add(api.Messages.GetById(new ulong[] {update[1]})[0]);
+                        continue;
+                    }
+
                     var parsed = new Message
                     {
                         Body = update[5],
@@ -25,7 +33,7 @@ namespace bsuir_chat_bot
                         Date = DateTimeOffset.FromUnixTimeSeconds((long) update[4]).UtcDateTime
                     };
 
-                    if (update[3] > 2000000000)
+                    if (update[3] > 2_000_000_000)
                     {
                         parsed.ChatId = ((long) update[3]).ToChatId();
                         parsed.FromId = update[6]["from"];
