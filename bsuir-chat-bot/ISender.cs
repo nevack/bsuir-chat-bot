@@ -9,7 +9,7 @@ namespace bsuir_chat_bot
         void Send(string message);
     }
 
-    public class VkSender : ISender
+    public abstract class VkSender : ISender
     {
         private readonly VkApi _api;
 
@@ -17,7 +17,6 @@ namespace bsuir_chat_bot
         {
             _api = api;
         }
-
 
         public void Send(string message)
         {
