@@ -12,7 +12,6 @@ namespace bsuir_chat_bot
     {        
         private static ConcurrentQueue<Command> _queue;
         private static ConcurrentQueue<Response> _outputQueue;
-        public static bool Kill = false;
 
         internal Worker(ConcurrentQueue<Command> queue, ConcurrentQueue<Response> outputQueue)
         {
@@ -22,7 +21,7 @@ namespace bsuir_chat_bot
 
         public void Work()
         {
-            while (!Kill)
+            while (true)
             {
                 if (_queue.TryDequeue(out var task))
                 {
