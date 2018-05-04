@@ -29,7 +29,7 @@ namespace bsuir_chat_bot
             _reddit = new Reddit(false);
         }
 
-        public override MessagesSendParams Handle(VkNet.Model.Message command)
+        protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {
             command.MarkAsRead(_api);
             var (_, args) = command.ParseFunc();

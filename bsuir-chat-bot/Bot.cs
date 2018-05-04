@@ -178,6 +178,19 @@ namespace bsuir_chat_bot
             var server = Api.Messages.GetLongPollServer();
             
             var reddit = new RedditProvider(Api);
+            var ping2 = new Ping2Provider();
+            
+            var funcs = new Dictionary<string, VkBotProvider>();
+
+            foreach (var redditFunction in reddit.Functions)
+            {
+                funcs.Add(redditFunction.Key, reddit);
+            }
+            
+            foreach (var function in ping2.Functions)
+            {
+                funcs.Add(function.Key, ping2);
+            }
             
             while (true)
             {
@@ -208,9 +221,15 @@ namespace bsuir_chat_bot
 
                     if (!match.Success) continue;
 
-                    if (s[0] == "/r") Api.Messages.Send(reddit.Handle(message));
+//                    if (s[0] == "/r") Api.Messages.Send(reddit.Handle(message));
                 
                     var command = match.Groups[1].Value.ToLower();
+                    
+                    if (funcs.ContainsKey(command))
+                    {
+                        Api.Messages.Send(funcs[command].Handle(message));
+                        continue;
+                    }
 
                     if (Functions.ContainsKey(command))
                     {

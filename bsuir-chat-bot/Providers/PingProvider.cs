@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.NetworkInformation;
 using VkNet.Model.RequestParams;
 
@@ -62,9 +63,9 @@ namespace bsuir_chat_bot
             return message;
         }
 
-        public override MessagesSendParams Handle(VkNet.Model.Message command)
+        protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {
-            var (func, args) = command.ParseFunc();
+            var (func, _) = command.ParseFunc();
 
             string message;
             

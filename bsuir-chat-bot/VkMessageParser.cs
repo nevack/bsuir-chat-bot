@@ -66,7 +66,7 @@ namespace bsuir_chat_bot
         public static (string, string[]) ParseFunc(this VkNet.Model.Message command)
         {
             var words = command.Body.Split();
-            var func = words[0];
+            var func = words[0].Substring(1);
             
             var args = words.Skip(1).ToArray();
 

@@ -36,8 +36,18 @@ namespace bsuir_chat_bot
 
             return help.ToString();
         }
+
+        public MessagesSendParams Handle(VkNet.Model.Message command)
+        {   
+//            var color = Console.ForegroundColor;
+//            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}'");
+//            Console.ForegroundColor = color;
+
+            return _handle(command);
+        }
         
-        public abstract MessagesSendParams Handle(VkNet.Model.Message command);
+        protected abstract MessagesSendParams _handle(VkNet.Model.Message command);
     }
 
     public abstract class CommandHandler
