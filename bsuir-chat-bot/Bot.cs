@@ -11,6 +11,7 @@ using VkNet.Enums.Filters;
 using System.Net.Http;
 using Newtonsoft.Json;
 using NLog;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {      
@@ -27,14 +28,18 @@ namespace bsuir_chat_bot
         
         private readonly HttpClient Client = new HttpClient();
         private readonly DateTime _startTime;
-        public Dictionary<string, Func<List<string>, string>> Functions;
+        public Dictionary<string, VkBotProvider> Functions;
+//        public Dictionary<string, Func<List<string>, string>> Functions;
         private ConcurrentQueue<Command> Requests;
-        private ConcurrentQueue<Response> Responses;
+//        private ConcurrentQueue<VkNet.Model.Message> Requests;
+//        private ConcurrentQueue<Response> Responses;
+        private ConcurrentQueue<MessagesSendParams> Responses;
         
         private VkApi Api;
         private Regex BotCommandRegex;
         
-        public Dictionary<string, IBotProvider> Providers;
+//        public Dictionary<string, IBotProvider> Providers;
+        public Dictionary<VkBotProvider, int> Providers;
 
         private const int NumberOfWorkerThreads = 4;
 
@@ -83,81 +88,97 @@ namespace bsuir_chat_bot
             
             BotCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
-            Functions = new Dictionary<string, Func<List<string>, string>>();
+//            Functions = new Dictionary<string, Func<List<string>, string>>();
+            Functions = new Dictionary<string, VkBotProvider>();
             
             var system = new SystemProvider(this);
 
-            Providers = new Dictionary<string, IBotProvider>
+//            Providers = new Dictionary<string, IBotProvider>
+//            {
+//                ["system"] = new SystemProvider(this),
+//                ["quote"] = new QuoteProvider("Fuhrer.json"),
+//                ["ping"] = new PingProvider(),
+//                ["wait"] = new WaitProvider(),
+//                ["flipcoin"] = new FlipcoinProvider(),
+////                ["reddit"] = new RedditProvider(),
+//                ["math"] = new MathProvider()
+//            };
+            Providers = new Dictionary<VkBotProvider, int>
             {
-                ["system"] = new SystemProvider(this),
-                ["quote"] = new QuoteProvider("Fuhrer.json"),
-                ["ping"] = new PingProvider(),
-                ["wait"] = new WaitProvider(),
-                ["flipcoin"] = new FlipcoinProvider(),
-//                ["reddit"] = new RedditProvider(),
-                ["math"] = new MathProvider()
+                [new Ping2Provider()] = 1,
+                [new RedditProvider(Api)] = 1,
             };
 
-            foreach (var func in system.Functions)
+//            foreach (var func in system.Functions)
+//            {
+//                Functions[func.Key] = func.Value;
+//            }
+//
+//            var modules = configuration.GetSection("modules").GetChildren().Select(c => c.Value).ToArray();
+//
+//            foreach (var module in modules)
+//            {
+//                foreach (var func in Providers[module].Functions)
+//                {            
+//                    Functions[func.Key] = func.Value;
+//                }
+//            }
+            
+            foreach (var module in Providers)
             {
-                Functions[func.Key] = func.Value;
-            }
-
-            var modules = configuration.GetSection("modules").GetChildren().Select(c => c.Value).ToArray();
-
-            foreach (var module in modules)
-            {
-                foreach (var func in Providers[module].Functions)
+                foreach (var func in module.Key.Functions)
                 {            
-                    Functions[func.Key] = func.Value;
+                    Functions[func.Key] = module.Key;
                 }
             }
             
             Requests = new ConcurrentQueue<Command>();
-            Responses = new ConcurrentQueue<Response>();
+//            Requests = new ConcurrentQueue<VkNet.Model.Message>();
+//            Responses = new ConcurrentQueue<Response>();
+            Responses = new ConcurrentQueue<MessagesSendParams>();
         }
 
-        public void LoadAll()
-        {
-            foreach (var name in Providers.Keys)
-            {
-                LoadModule(name);
-            }
-        }
-        
-        public void UnloadAll()
-        {
-            foreach (var name in Providers.Keys)
-            {
-                UnloadModule(name);
-            }
-        }
-
-        public bool LoadModule(string name)
-        {
-            if (!Providers.ContainsKey(name)) return false;
-            
-            foreach (var function in Providers[name].Functions)
-            {
-                Functions.TryAdd(function.Key, function.Value);
-            }
-
-            return true;
-        }
-
-        public bool UnloadModule(string name)
-        {
-            if (!Providers.ContainsKey(name)) return false;
-
-            if (name == "system") return false;
-            
-            foreach (var function in Providers[name].Functions.Keys)
-            {
-                        Functions.Remove(function);
-            }
-
-            return true;
-        }
+//        public void LoadAll()
+//        {
+//            foreach (var name in Providers.Keys)
+//            {
+//                LoadModule(name);
+//            }
+//        }
+//        
+//        public void UnloadAll()
+//        {
+//            foreach (var name in Providers.Keys)
+//            {
+//                UnloadModule(name);
+//            }
+//        }
+//
+//        public bool LoadModule(string name)
+//        {
+//            if (!Providers.ContainsKey(name)) return false;
+//            
+//            foreach (var function in Providers[name].Functions)
+//            {
+//                Functions.TryAdd(function.Key, function.Value);
+//            }
+//
+//            return true;
+//        }
+//
+//        public bool UnloadModule(string name)
+//        {
+//            if (!Providers.ContainsKey(name)) return false;
+//
+//            if (name == "system") return false;
+//            
+//            foreach (var function in Providers[name].Functions.Keys)
+//            {
+//                        Functions.Remove(function);
+//            }
+//
+//            return true;
+//        }
     
         public void Start()
         {
@@ -233,9 +254,10 @@ namespace bsuir_chat_bot
 
                     if (Functions.ContainsKey(command))
                     {
-                        var task = new Command(message, Functions[command], s.Skip(1).ToList());
+                        var task = new Command(message, Functions[command].Handle);
                         Requests.Enqueue(task);
                         Console.WriteLine("Request accepted");
+//                        Requests.Enqueue(message);
                     }
                 }
             }

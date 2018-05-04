@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
     public class Command
     {
         public VkNet.Model.Message Message;
-        public Func<List<string>, string> Function;
-        public List<string> Args;
+        public Func<VkNet.Model.Message, MessagesSendParams> Function;
         public DateTime RecievedTime { get; }
         
-        public Command(VkNet.Model.Message message, Func<List<string>, string> function, List<string> args)
+        public Command(VkNet.Model.Message message, Func<VkNet.Model.Message, MessagesSendParams> f)
         {
-            Args = args;
-            Function = function;
+            Function = f;
             Message = message;
             RecievedTime = DateTime.Now;
         }

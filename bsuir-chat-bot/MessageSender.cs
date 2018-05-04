@@ -9,11 +9,12 @@ namespace bsuir_chat_bot
 {
     public class MessageSender
     {
-        private static ConcurrentQueue<Response> _outputQueue;
+//        private static ConcurrentQueue<Response> _outputQueue;
+        private static ConcurrentQueue<MessagesSendParams> _outputQueue;
         private static VkApi _api;
         public static bool Kill = false;
 
-        internal MessageSender(ConcurrentQueue<Response> outputQueue, VkApi api)
+        internal MessageSender(ConcurrentQueue<MessagesSendParams> outputQueue, VkApi api)
         {
             _api = api;
             _outputQueue = outputQueue;
@@ -29,11 +30,7 @@ namespace bsuir_chat_bot
                 {
                     try
                     {
-                        _api.Messages.Send(new MessagesSendParams
-                        {
-                            PeerId = mess.InputMessage.ChatId?.ToPeerId() ?? mess.InputMessage.FromId,
-                            Message = $"{mess.FuncOutput} [id{mess.InputMessage.FromId}|©]"
-                        });
+                        _api.Messages.Send(mess);
 
                         if (sleeptime > 200) sleeptime /= 2;
                     }
