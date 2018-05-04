@@ -33,6 +33,7 @@ namespace bsuir_chat_bot
         
         private VkApi Api;
         private Regex BotCommandRegex;
+        
         public Dictionary<string, IBotProvider> Providers;
 
         private const int NumberOfWorkerThreads = 4;
@@ -93,7 +94,7 @@ namespace bsuir_chat_bot
                 ["ping"] = new PingProvider(),
                 ["wait"] = new WaitProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
-                ["reddit"] = new RedditProvider(),
+//                ["reddit"] = new RedditProvider(),
                 ["math"] = new MathProvider()
             };
 
@@ -176,6 +177,8 @@ namespace bsuir_chat_bot
             long timestamp = -1;
             var server = Api.Messages.GetLongPollServer();
             
+            var reddit = new RedditProvider(Api);
+            
             while (true)
             {
                 var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
@@ -204,6 +207,8 @@ namespace bsuir_chat_bot
                     var match = BotCommandRegex.Match(s[0]);
 
                     if (!match.Success) continue;
+
+                    if (s[0] == "/r") reddit.Handle(message);
                 
                     var command = match.Groups[1].Value.ToLower();
 
