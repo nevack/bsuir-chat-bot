@@ -1,5 +1,4 @@
 ﻿using VkNet;
-using VkNet.Model;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot

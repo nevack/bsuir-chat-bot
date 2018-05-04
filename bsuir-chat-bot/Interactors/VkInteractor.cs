@@ -6,7 +6,6 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NLog;
-using QRCoder;
 using VkNet;
 using VkNet.Enums.Filters;
 

@@ -5,13 +5,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using RedditSharp;
 using RedditSharp.Things;
 using VkNet;
-using VkNet.Model;
-using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -23,46 +20,38 @@ namespace bsuir_chat_bot
 
         internal RedditProvider(VkApi api)
         {
-            Functions = new Dictionary<string, string>();
-            Functions.Add("r", "syntax: /r [hot|top|new] subreddit - get subreddit picture");
-            
+            Functions = new Dictionary<string, string>
+            {
+                {"r", "syntax: /r [hot|top|new] subreddit - get subreddit picture"}
+            };
+
             _api = api;
             _reddit = new Reddit(false);
-        }
-
-        public string GetAllHelp()
-        {
-            var help = new StringBuilder();
-
-            foreach (var function in Functions)
-            {
-                help.AppendLine(function.Value);
-            }
-
-            return help.ToString();
         }
 
         public override MessagesSendParams Handle(VkNet.Model.Message command)
         {
             command.MarkAsRead(_api);
-            var (func, args) = command.ParseFunc();
+            var (_, args) = command.ParseFunc();
 
             var sub = _reddit.GetSubreddit(args[0]);
-            var posts = sub.GetTop(FromTime.Day).Take(20);
+            var posts = sub.GetTop(FromTime.Day).Take(20).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
+            
+            var rand = new Random();
 
-            string image = null;
-            var nsfw = false;
-            foreach (var post in posts)
+            if (posts.Count == 0)
             {
-                if (post.Url.ToString().EndsWith(".jpg"))
+                return new MessagesSendParams
                 {
-                    image = post.Url.ToString();
-                    nsfw = post.NSFW;
-                    break;
-                }
+                    Message = "Error getting image",
+                    PeerId = command.GetPeerId()
+                };
             }
 
-            if (nsfw)
+            var post = posts[rand.Next(0, posts.Count)];
+            var image = post.Url.ToString();
+
+            if (post.NSFW)
             {
                 return new MessagesSendParams
                 {
@@ -71,28 +60,20 @@ namespace bsuir_chat_bot
                 };
             }
 
-            if (!string.IsNullOrEmpty(image))
-            {
-                var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
-                var wc = new WebClient();
+            var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
+            var wc = new WebClient();
                 
-                byte[] imageBytes = wc.DownloadData(image);
+            var imageBytes = wc.DownloadData(image);
 
-                var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
+            var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
 
-//            var responseFile = Encoding.ASCII.GetString(wc.UploadFile(server.UploadUrl, 
-//                !string.IsNullOrEmpty(image) ? "1.jpg" : @"C:\Users\dimch\Desktop\93jwxgJXMiY.jpg"));
+            var photos = _api.Photo.SaveMessagesPhoto(responseFile);
 
-                var photos = _api.Photo.SaveMessagesPhoto(responseFile);
-
-                return new MessagesSendParams
-                {
-                    Attachments = photos,
-                    PeerId = command.GetPeerId()
-                };
-            }
-
-            return null;
+            return new MessagesSendParams
+            {
+                Attachments = photos,
+                PeerId = command.GetPeerId()
+            };
         }
         
         private async Task<string> UploadImage(string url, byte[] data)
@@ -101,8 +82,8 @@ namespace bsuir_chat_bot
             {
                 var requestContent = new MultipartFormDataContent();
                 var imageContent = new ByteArrayContent(data);
+                
                 imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
-//                imageContent.Headers.ContentEncoding.Add("UTF-8");
                 requestContent.Add(imageContent, "photo", "image.jpg");
 
                 var response = await client.PostAsync(url, requestContent);
