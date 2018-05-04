@@ -43,19 +43,26 @@ namespace bsuir_chat_bot
             {
                 if (post.Thumbnail.ToString().Length > 10)
                     if (post.Url.ToString().EndsWith(".jpg"))
+                    {
                         image = post.Url.ToString();
+                        break;
+                    }
             }
             
             
             var server = _api.Photo.GetMessagesUploadServer(command.ChatId?.ToPeerId() ?? command.FromId.Value);
             var wc = new WebClient();
-            if (!string.IsNullOrEmpty(image)) wc.DownloadFile(image, "1.jpg");
-            //byte[] imageBytes = wc.DownloadData("http://www.google.com/images/logos/ps_logo2.png");
             
-            //var responseFile = Encoding.ASCII.GetString(wc.UploadData(server.UploadUrl, imageBytes));
+//            if (!string.IsNullOrEmpty(image)) wc.DownloadFile(image, "1.jpg");
+            
+            byte[] imageBytes = wc.DownloadData(image);
+            Console.WriteLine(imageBytes.Length);
+            
+            var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
+            Console.WriteLine(responseFile);
 
-            var responseFile = Encoding.ASCII.GetString(wc.UploadFile(server.UploadUrl, 
-                !string.IsNullOrEmpty(image) ? "1.jpg" : @"C:\Users\dimch\Desktop\93jwxgJXMiY.jpg"));
+//            var responseFile = Encoding.ASCII.GetString(wc.UploadFile(server.UploadUrl, 
+//                !string.IsNullOrEmpty(image) ? "1.jpg" : @"C:\Users\dimch\Desktop\93jwxgJXMiY.jpg"));
 
             var photos = _api.Photo.SaveMessagesPhoto(responseFile);
 
