@@ -23,7 +23,7 @@ namespace bsuir_chat_bot
             throw new System.NotImplementedException();
         }
         
-        public void Send(Message message)
+        public void Send(VkNet.Model.Message message)
         {
             _api.Messages.Send(new MessagesSendParams
             {
@@ -31,5 +31,6 @@ namespace bsuir_chat_bot
                 Message = $"{message.Body} [id{message.FromId}|©]"
             });
         }
+        
     }
 }

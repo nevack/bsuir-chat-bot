@@ -1,15 +1,19 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace bsuir_chat_bot
 {
-    public interface IApiInteractor
+    public abstract class ApiInteractor
     {
-        void SendMessage(Message message);
+        protected ConcurrentQueue<Message> _outputQueue;
+        
+        protected ApiInteractor(ConcurrentQueue<Message> outputQueue)
+        {
+            _outputQueue = outputQueue;
+        }
+        
+        public abstract void SendMessage(Message message);
 
-        
-        
-        void StoreMessages(ConcurrentQueue<Command> queue);
-        
-        
+        public abstract IEnumerable<Message> GetHistory(string chat);
     }
 }

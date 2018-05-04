@@ -194,7 +194,7 @@ namespace bsuir_chat_bot
                     continue;
                 }
 
-                var messages = VkMessageParser.ParseLongPollMessage(responseString);
+                var messages = Api.ParseLongPollMessage(responseString);
                 if (messages == null) continue;
                 
                 foreach (var message in messages)

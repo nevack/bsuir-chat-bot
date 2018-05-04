@@ -11,7 +11,7 @@ namespace bsuir_chat_bot
     {
         private const int Message = 4;
 
-        public static List<Message> ParseLongPollMessage(this VkApi api,  string content)
+        public static List<VkNet.Model.Message> ParseLongPollMessage(this VkApi api,  string content)
         {
             var responseDict = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(content);
             if (!responseDict.ContainsKey("updates")) return null;
@@ -26,7 +26,7 @@ namespace bsuir_chat_bot
                         continue;
                     }
 
-                    var parsed = new Message
+                    var parsed = new VkNet.Model.Message()
                     {
                         Body = update[5],
                         Id = update[1],
