@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VkNet;
@@ -48,6 +49,16 @@ namespace bsuir_chat_bot
             }
 
             return messageList;
+        }
+        
+        public static (string, string[]) ParseFunc(this VkNet.Model.Message command)
+        {
+            var words = command.Body.Split();
+            var func = words[0];
+            
+            var args = words.Skip(1).ToArray();
+
+            return (func, args);
         }
 
         public static long ToPeerId(this long id) => id + 2_000_000_000;

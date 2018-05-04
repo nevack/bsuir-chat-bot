@@ -20,15 +20,20 @@ namespace bsuir_chat_bot
         private readonly VkApi _api;
         private readonly Reddit _reddit;
 
+        public Dictionary<string, string> Functions;
+
         internal RedditProvider(VkApi api)
         {
+            Functions = new Dictionary<string, string>();
+            Functions.Add("r", "syntax: /r [hot|top|new] subreddit - get subreddit picture");
+            
             _api = api;
             _reddit = new Reddit(false);
         }
 
-        public Message Handle(Message command)
+        public Message Handle(VkNet.Model.Message command)
         {
-            var (func, args) = parseFunc(command.Body);
+            var (func, args) = command.ParseFunc();
 
             var sub = _reddit.GetSubreddit(args[0]);
             var posts = sub.Hot.Take(20);
@@ -59,6 +64,7 @@ namespace bsuir_chat_bot
                 Attachments = photos,
                 PeerId = command.ChatId?.ToPeerId() ?? command.FromId,
             });
+            
             return null;
         }
         
@@ -75,16 +81,6 @@ namespace bsuir_chat_bot
 
                 return await response.Content.ReadAsStringAsync();
             }
-        }
-
-        private (string, string[]) parseFunc(string command)
-        {
-            var words = command.Split();
-            var func = words[0];
-            
-            var args = words.Skip(1).ToArray();
-
-            return (func, args);
         }
     }
 }
