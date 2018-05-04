@@ -22,6 +22,7 @@ namespace bsuir_chat_bot
             Functions = new Dictionary<string, Func<List<string>, string>>
             {
                 {"quote", GetQuoteString}
+                
             };
         }
 
