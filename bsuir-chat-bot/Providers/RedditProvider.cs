@@ -31,8 +31,21 @@ namespace bsuir_chat_bot
             _reddit = new Reddit(false);
         }
 
+        public string GetAllHelp()
+        {
+            var help = new StringBuilder();
+
+            foreach (var function in Functions)
+            {
+                help.AppendLine(function.Value);
+            }
+
+            return help.ToString();
+        }
+
         public Message Handle(VkNet.Model.Message command)
         {
+            command.MarkAsRead(_api);
             var (func, args) = command.ParseFunc();
 
             var sub = _reddit.GetSubreddit(args[0]);
@@ -69,7 +82,7 @@ namespace bsuir_chat_bot
             _api.Messages.Send(new MessagesSendParams
             {
                 Attachments = photos,
-                PeerId = command.ChatId?.ToPeerId() ?? command.FromId,
+                PeerId = command.GetPeerId()
             });
             
             return null;
