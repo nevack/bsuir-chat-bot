@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using VkNet.Model.RequestParams;
+﻿using System.Threading;
 
 namespace bsuir_chat_bot
 {
     
     public class Worker
-    {        
-        private static ConcurrentQueue<Command> _queue;
-        private static ConcurrentQueue<MessagesSendParams> _outputQueue;
+    {
+        private readonly Bot _bot;
 
-        internal Worker(ConcurrentQueue<Command> queue, ConcurrentQueue<MessagesSendParams> outputQueue)
+        internal Worker(Bot bot)
         {
-            _queue = queue;
-            _outputQueue = outputQueue;
+            _bot = bot;
         }
 
         public void Work()
         {
-            while (true)
+            while (_bot.BotState == Bot.State.Running)
             {
-                if (_queue.TryDequeue(out var task))
+                if (_bot.Requests.TryDequeue(out var task))
                 {
-                    _outputQueue.Enqueue(task.Function(task.Message));
+                    _bot.Responses.Enqueue(task.Function(task.Message));
                 }
                 else
                     Thread.Sleep(10);

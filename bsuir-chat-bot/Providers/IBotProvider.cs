@@ -24,6 +24,8 @@ namespace bsuir_chat_bot
     public abstract class VkBotProvider
     {
         public Dictionary<string, string> Functions { get; protected set; }
+
+        public ProviderState State { get; set; } = ProviderState.Loaded;
         
         public string GetAllHelp()
         {
@@ -38,7 +40,8 @@ namespace bsuir_chat_bot
         }
 
         public MessagesSendParams Handle(VkNet.Model.Message command)
-        {   
+        {
+            if (State != ProviderState.Loaded) return null;
 //            var color = Console.ForegroundColor;
 //            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}'");

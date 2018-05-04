@@ -1,44 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
-{
-    public class PingProvider : IBotProvider
+{   
+    public class PingProvider : VkBotProvider
     {
-        public Dictionary<string, Func<List<string>, string>> Functions { get; }
-        
         public PingProvider()
-        {
-            Functions = new Dictionary<string, Func<List<string>, string>>
-            {
-                {"ping", Ping},
-                {"pong", list => "ping"},
-                {"pang", list => "HHЫЬЫТолыо!!тЛылЬЬ;27~~&@!"}
-            };
-        }
-
-        private string Ping(List<string> args)
-        {
-            var pingSender = new Ping ();
-            var reply = pingSender.Send("87.240.129.71");
-
-            var message = "pong 🏓";
-
-            if (reply != null && reply.Status == IPStatus.Success)
-            {
-                message += $" -- {reply.RoundtripTime * 2}ms";
-            }
-
-            return message;
-        }
-    }
-    
-    public class Ping2Provider : VkBotProvider
-    {
-        public Ping2Provider()
         {
             Functions = new Dictionary<string, string>
             {
@@ -48,7 +16,7 @@ namespace bsuir_chat_bot
             };
         }
 
-        private string Ping()
+        private static string Ping()
         {
             var pingSender = new Ping ();
             var reply = pingSender.Send("87.240.129.71");

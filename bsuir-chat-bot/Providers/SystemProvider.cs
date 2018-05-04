@@ -1,55 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
-{
-    public class SystemProvider : IBotProvider
+{   
+    public class SystemProvider : VkBotProvider
     {
         private readonly Bot _bot;
-        public Dictionary<string, Func<List<string>, string>> Functions { get; }
 
         internal SystemProvider(Bot bot)
         {
             _bot = bot;
-            Functions = new Dictionary<string, Func<List<string>, string>>
+            Functions = new Dictionary<string, string>
             {
                 {
-                    "stop", list =>
-                    {
-                        var t = new Thread(() =>
-                        {
-                            Thread.Sleep(1000);
-                            bot.BotState = Bot.State.Stoped;
-                        });
-                        t.Start();
-                        return "Bye";
-                    }
+                    "stop", "stop - stop the bot"
                 },
                 {
-                    "sleep", list => { 
-                        Sleep();
-                        return "zZzzzzZzzz";
-                    }
+                    "sleep", "sleep - make bot sleep"
                 },
                 {
-                    "wakeup", list => { 
-                        WakeUp();
-                        return "Ready!";
-                    }
+                    "wakeup", "wakeup - it's september"
                 },
                 {
-                    "uptime", list => GetUptime()
+                    "uptime", "uptime - get bot time running"
                 },
-//                {
-//                    "load", LoadModule
-//                },
-//                {
-//                    "unload", UnloadModule
-//                }
+                {
+                    "load", "load - load a module"
+                },
+                {
+                    "unload", "unload - unload a module"
+                }
             };
+        }
+
+        private void Stop()
+        {
+            var t = new Thread(() =>
+            {
+                Thread.Sleep(1000);
+                _bot.BotState = Bot.State.Stoped;
+            });
+            t.Start();
         }
 
         private void Sleep()
@@ -102,5 +95,56 @@ namespace bsuir_chat_bot
 //
 //            return s.ToString();
 //        }
+        
+        protected override MessagesSendParams _handle(VkNet.Model.Message command)
+        {
+            if (command.FromId.HasValue)
+            if (!_bot.Admins.Contains(command.FromId.Value))
+            {            
+                return new MessagesSendParams
+                {
+                    Message = "Permission denied",
+                    PeerId = command.GetPeerId()
+                };
+            }
+            
+            var (func, _) = command.ParseFunc();
+
+            string message;
+            
+            switch (func.ToLowerInvariant())
+            {
+                case "sleep":
+                    Sleep();
+                    message = "zZzzzzZzzz";
+                    break;
+                
+                case "wakeup":
+                    WakeUp();
+                    message = "Ready!";
+                    break;
+                
+                case "stop":
+                    Stop();
+                    message = "Bye";
+                    break;
+                
+                case "uptime":
+                    message = GetUptime();
+                    break;
+                
+                default:
+                    message = "Not implemented yet";
+                    break;
+            }
+
+            var param = new MessagesSendParams
+            {
+                Message = message,
+                PeerId = command.GetPeerId()
+            };
+
+            return param;
+        }
     }
 }

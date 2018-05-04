@@ -24,22 +24,20 @@ namespace bsuir_chat_bot
             Stoped
         }
 
-        public State BotState = State.Stoped;
+        public long[] Admins { get; }
         
-        private readonly HttpClient Client = new HttpClient();
+        public State BotState { get; set; } = State.Stoped;
+        
+        private readonly HttpClient _client = new HttpClient();
         private readonly DateTime _startTime;
-        public Dictionary<string, VkBotProvider> Functions;
-//        public Dictionary<string, Func<List<string>, string>> Functions;
-        private ConcurrentQueue<Command> Requests;
-//        private ConcurrentQueue<VkNet.Model.Message> Requests;
-//        private ConcurrentQueue<Response> Responses;
-        private ConcurrentQueue<MessagesSendParams> Responses;
+        private readonly Dictionary<string, VkBotProvider> _functions;
+        public ConcurrentQueue<Command> Requests { get; }
+        public ConcurrentQueue<MessagesSendParams> Responses { get; }
         
-        private VkApi Api;
-        private Regex BotCommandRegex;
-        
-//        public Dictionary<string, IBotProvider> Providers;
-        public Dictionary<VkBotProvider, int> Providers;
+        public VkApi Api { get; }
+        private readonly Regex _botCommandRegex;
+
+        private Dictionary<VkBotProvider, int> Providers { get; }
 
         private const int NumberOfWorkerThreads = 4;
 
@@ -86,49 +84,27 @@ namespace bsuir_chat_bot
 
             Console.WriteLine($"Started with token:\n{Api.Token}\n");
             
-            BotCommandRegex = new Regex(@"^[\/\\\!](\w+)");
+            _botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
-//            Functions = new Dictionary<string, Func<List<string>, string>>();
-            Functions = new Dictionary<string, VkBotProvider>();
-            
-            var system = new SystemProvider(this);
+            _functions = new Dictionary<string, VkBotProvider>();
 
-//            Providers = new Dictionary<string, IBotProvider>
-//            {
-//                ["system"] = new SystemProvider(this),
-//                ["quote"] = new QuoteProvider("Fuhrer.json"),
-//                ["ping"] = new PingProvider(),
-//                ["wait"] = new WaitProvider(),
-//                ["flipcoin"] = new FlipcoinProvider(),
-////                ["reddit"] = new RedditProvider(),
-//                ["math"] = new MathProvider()
-//            };
             Providers = new Dictionary<VkBotProvider, int>
             {
-                [new Ping2Provider()] = 1,
+                [new PingProvider()] = 1,
                 [new RedditProvider(Api)] = 1,
+                [new SystemProvider(this)] = 1,
+                [new QuoteProvider("Fuhrer.json")] = 1,
+                [new MathProvider()] = 1,
+                [new FlipcoinProvider()] = 1
             };
-
-//            foreach (var func in system.Functions)
-//            {
-//                Functions[func.Key] = func.Value;
-//            }
-//
-//            var modules = configuration.GetSection("modules").GetChildren().Select(c => c.Value).ToArray();
-//
-//            foreach (var module in modules)
-//            {
-//                foreach (var func in Providers[module].Functions)
-//                {            
-//                    Functions[func.Key] = func.Value;
-//                }
-//            }
+            
+            Admins = configuration.GetSection("admins").GetChildren().Select(c => long.Parse(c.Value)).ToArray();
             
             foreach (var module in Providers)
             {
                 foreach (var func in module.Key.Functions)
                 {            
-                    Functions[func.Key] = module.Key;
+                    _functions[func.Key] = module.Key;
                 }
             }
             
@@ -186,36 +162,21 @@ namespace bsuir_chat_bot
             
             for (var i = 0; i < NumberOfWorkerThreads; i++)
             {
-                var worker = new Worker(Requests, Responses);
+                var worker = new Worker(this);
                 var workerThread = new Thread(worker.Work);
                 workerThread.Start();
             }
             
-            var sender = new MessageSender(Responses, Api);
+            var sender = new MessageSender(this);
             var senderThread = new Thread(sender.Work);
             senderThread.Start();
             
             long timestamp = -1;
             var server = Api.Messages.GetLongPollServer();
             
-            var reddit = new RedditProvider(Api);
-            var ping2 = new Ping2Provider();
-            
-            var funcs = new Dictionary<string, VkBotProvider>();
-
-            foreach (var redditFunction in reddit.Functions)
-            {
-                funcs.Add(redditFunction.Key, reddit);
-            }
-            
-            foreach (var function in ping2.Functions)
-            {
-                funcs.Add(function.Key, ping2);
-            }
-            
             while (true)
             {
-                var response = Client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
+                var response = _client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
                 response.Wait();
                 
                 var responseString = response.Result.Content.ReadAsStringAsync().Result;
@@ -238,23 +199,15 @@ namespace bsuir_chat_bot
                 {
                     var s = message.Body.Split(" ").ToList();
                 
-                    var match = BotCommandRegex.Match(s[0]);
+                    var match = _botCommandRegex.Match(s[0]);
 
                     if (!match.Success) continue;
-
-//                    if (s[0] == "/r") Api.Messages.Send(reddit.Handle(message));
                 
                     var command = match.Groups[1].Value.ToLower();
-                    
-                    if (funcs.ContainsKey(command))
+                   
+                    if (_functions.ContainsKey(command))
                     {
-                        Api.Messages.Send(funcs[command].Handle(message));
-                        continue;
-                    }
-
-                    if (Functions.ContainsKey(command))
-                    {
-                        var task = new Command(message, Functions[command].Handle);
+                        var task = new Command(message, _functions[command].Handle);
                         Requests.Enqueue(task);
                         Console.WriteLine("Request accepted");
 //                        Requests.Enqueue(message);

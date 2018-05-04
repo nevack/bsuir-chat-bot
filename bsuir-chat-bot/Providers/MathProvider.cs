@@ -2,64 +2,63 @@
 using System.Collections.Generic;
 using System.Linq;
 using NCalc;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    public class MathProvider: IBotProvider
+    public class MathProvider: VkBotProvider
     {
-        public Dictionary<string, Func<List<string>, string>> Functions { get; }
+        private readonly Dictionary<string, object> _parameters;
 
         public MathProvider()
         {
-            var parameters = new Dictionary<string, object>()
+            _parameters = new Dictionary<string, object>()
             {
                 ["Pi"] = Math.PI,
                 ["pi"] = Math.PI,
                 ["E"] = Math.E,
                 ["e"] = Math.E
             };
-            
-            Functions = new Dictionary<string, Func<List<string>, string>>
+
+            Functions = new Dictionary<string, string>
             {
-                {"calc", list =>
-                    {
-                        var expr = new Expression(string.Join(' ', list)) {Parameters = parameters};
+                {"calc", "calc - evaluate expression" }
+            };
+        }
 
+        protected override MessagesSendParams _handle(VkNet.Model.Message command)
+        {
+            var (_, args) = command.ParseFunc();
+            var expr = new Expression(string.Join(' ', args)) {Parameters = _parameters};
 
+            void Repeat(string name, FunctionArgs argz)
+            {
+                if (name == "Repeat")
+                {
+                    var ex = argz.Parameters[0];
+                    ex.EvaluateFunction += Repeat;
 
-                        void Repeat(string name, FunctionArgs args)
-                        {
-                            if (name == "Repeat")
-                            {
-                                var ex = args.Parameters[0];
-                                ex.EvaluateFunction += Repeat;
-
-                                args.Result = string.Concat(Enumerable.Repeat(ex.Evaluate().ToString(),
-                                    (int) args.Parameters[1].Evaluate()));
-                            }
-                        }
-
-//                        expr.EvaluateFunction += delegate(string name, FunctionArgs args)
-//                        {
-//                            if (name == "Repeat")
-//                                args.Result = string.Concat(Enumerable.Repeat(args.Parameters[0].Evaluate().ToString(),
-//                                    (int) args.Parameters[1].Evaluate()));
-//                        };
-                        
-                        expr.EvaluateFunction += Repeat;
-
-                        var s = "Error! ";
-                        try
-                        {
-                            s = expr.Evaluate().ToString();
-                        }
-                        catch (Exception e)
-                        {
-                            s += e.Message;
-                        }
-                        return s;
-                    }
+                    argz.Result = string.Concat(Enumerable.Repeat(ex.Evaluate().ToString(),
+                        (int) argz.Parameters[1].Evaluate()));
                 }
+            }
+                        
+            expr.EvaluateFunction += Repeat;
+
+            var s = "Error! ";
+            try
+            {
+                s = expr.Evaluate().ToString();
+            }
+            catch (Exception e)
+            {
+                s += e.Message;
+            }
+            
+            return new MessagesSendParams()
+            {
+                PeerId = command.GetPeerId(),
+                Message =  s
             };
         }
     }

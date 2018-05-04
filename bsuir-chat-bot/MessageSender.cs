@@ -1,57 +1,52 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
-using VkNet;
 using VkNet.Exception;
-using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
     public class MessageSender
     {
-//        private static ConcurrentQueue<Response> _outputQueue;
-        private static ConcurrentQueue<MessagesSendParams> _outputQueue;
-        private static VkApi _api;
-        public static bool Kill = false;
+        private const int ChecksPerSecond = 100;
+        private readonly Bot _bot;
+        private int _millisecondsTimeout;
 
-        internal MessageSender(ConcurrentQueue<MessagesSendParams> outputQueue, VkApi api)
+        internal MessageSender(Bot bot)
         {
-            _api = api;
-            _outputQueue = outputQueue;
+            _bot = bot;
         }
 
         public void Work()
         {
-            var sleeptime = 200;
-            const int checksPerSecond = 100;
-            while (!Kill)
+            _millisecondsTimeout = 200;
+
+            while (_bot.BotState == Bot.State.Running)
             {
-                if (_outputQueue.TryDequeue(out var mess))
+                if (_bot.Responses.TryDequeue(out var messageSend))
                 {
                     try
                     {
-                        _api.Messages.Send(mess);
+                        _bot.Api.Messages.Send(messageSend);
 
-                        if (sleeptime > 200) sleeptime /= 2;
+                        if (_millisecondsTimeout > 200) _millisecondsTimeout /= 2;
                     }
                     catch (CaptchaNeededException)
                     {    
                         Thread.Sleep(60 /*seconds*/ * 1000);
-                        _outputQueue.Enqueue(mess);
+                        _bot.Responses.Enqueue(messageSend);
                     }
                     catch (Exception e)
                     {
-                        sleeptime *= sleeptime < 6_400 
+                        _millisecondsTimeout *= _millisecondsTimeout < 6_400 
                             ? 2 
                             : throw e;
-                        _outputQueue.Enqueue(mess);
+                        _bot.Responses.Enqueue(messageSend);
                     }
                     
-                    Console.WriteLine($"Sleep: {sleeptime}ms");
-                    Thread.Sleep(sleeptime);
+                    Console.WriteLine($"Sleep: {_millisecondsTimeout}ms");
+                    Thread.Sleep(_millisecondsTimeout);
                 }
                 else
-                    Thread.Sleep(1000 / checksPerSecond);
+                    Thread.Sleep(1000 / ChecksPerSecond);
             }
         }
     }
