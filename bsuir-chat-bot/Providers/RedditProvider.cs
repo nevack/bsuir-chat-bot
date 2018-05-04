@@ -82,11 +82,12 @@ namespace bsuir_chat_bot
                 var requestContent = new MultipartFormDataContent();
                 var imageContent = new ByteArrayContent(data);
                 imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+//                imageContent.Headers.ContentEncoding.Add("UTF-8");
                 requestContent.Add(imageContent, "photo", "image.jpg");
 
                 var response = await client.PostAsync(url, requestContent);
 
-                return await response.Content.ReadAsStringAsync();
+                return Encoding.ASCII.GetString(await response.Content.ReadAsByteArrayAsync());
             }
         }
     }
