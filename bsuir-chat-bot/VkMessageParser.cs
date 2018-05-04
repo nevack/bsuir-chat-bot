@@ -51,9 +51,9 @@ namespace bsuir_chat_bot
             return messageList;
         }
 
-        public static long? GetPeerId(this VkNet.Model.Message message)
+        public static long GetPeerId(this VkNet.Model.Message message)
         {
-            return message.ChatId?.ToPeerId() ?? message.FromId;
+            return message.ChatId?.ToPeerId() ?? message.FromId.Value;
         }
         
         public static bool MarkAsRead(this VkNet.Model.Message message, VkApi api)

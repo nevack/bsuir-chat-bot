@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
@@ -19,9 +21,31 @@ namespace bsuir_chat_bot
         }
     }
 
-    public abstract class VkBotProvider : IBotProvider
+    public abstract class VkBotProvider
     {
-        public virtual ProviderState State { get; set; }
-        public Dictionary<string, Func<List<string>, string>> Functions { get; }
+        public Dictionary<string, string> Functions { get; protected set; }
+        
+        public string GetAllHelp()
+        {
+            var help = new StringBuilder();
+
+            foreach (var function in Functions)
+            {
+                help.AppendLine(function.Value);
+            }
+
+            return help.ToString();
+        }
+        
+        public abstract MessagesSendParams Handle(VkNet.Model.Message command);
+    }
+
+    public abstract class CommandHandler
+    {
+        public string Name;
+        public string Help;
+        public VkBotProvider Provider;
+
+        public abstract MessagesSendParams Handle(string func, List<string> args);
     }
 }

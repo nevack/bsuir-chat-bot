@@ -208,7 +208,7 @@ namespace bsuir_chat_bot
 
                     if (!match.Success) continue;
 
-                    if (s[0] == "/r") reddit.Handle(message);
+                    if (s[0] == "/r") Api.Messages.Send(reddit.Handle(message));
                 
                     var command = match.Groups[1].Value.ToLower();
 

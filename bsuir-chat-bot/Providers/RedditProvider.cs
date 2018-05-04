@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using RedditSharp;
+using RedditSharp.Things;
 using VkNet;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -15,12 +16,10 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    public class RedditProvider
+    public class RedditProvider : VkBotProvider
     {
         private readonly VkApi _api;
         private readonly Reddit _reddit;
-
-        public Dictionary<string, string> Functions;
 
         internal RedditProvider(VkApi api)
         {
@@ -43,48 +42,56 @@ namespace bsuir_chat_bot
             return help.ToString();
         }
 
-        public Message Handle(VkNet.Model.Message command)
+        public override MessagesSendParams Handle(VkNet.Model.Message command)
         {
             command.MarkAsRead(_api);
             var (func, args) = command.ParseFunc();
 
             var sub = _reddit.GetSubreddit(args[0]);
-            var posts = sub.Hot.Take(20);
+            var posts = sub.GetTop(FromTime.Day).Take(20);
 
             string image = null;
+            var nsfw = false;
             foreach (var post in posts)
             {
-                if (post.Thumbnail.ToString().Length > 10)
-                    if (post.Url.ToString().EndsWith(".jpg"))
-                    {
-                        image = post.Url.ToString();
-                        break;
-                    }
+                if (post.Url.ToString().EndsWith(".jpg"))
+                {
+                    image = post.Url.ToString();
+                    nsfw = post.NSFW;
+                    break;
+                }
             }
-            
-            
-            var server = _api.Photo.GetMessagesUploadServer(command.ChatId?.ToPeerId() ?? command.FromId.Value);
-            var wc = new WebClient();
-            
-//            if (!string.IsNullOrEmpty(image)) wc.DownloadFile(image, "1.jpg");
-            
-            byte[] imageBytes = wc.DownloadData(image);
-            Console.WriteLine(imageBytes.Length);
-            
-            var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
-            Console.WriteLine(responseFile);
+
+            if (nsfw)
+            {
+                return new MessagesSendParams
+                {
+                    Message = $"Link for 'friend': {image}",
+                    PeerId = command.GetPeerId()
+                };
+            }
+
+            if (!string.IsNullOrEmpty(image))
+            {
+                var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
+                var wc = new WebClient();
+                
+                byte[] imageBytes = wc.DownloadData(image);
+
+                var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
 
 //            var responseFile = Encoding.ASCII.GetString(wc.UploadFile(server.UploadUrl, 
 //                !string.IsNullOrEmpty(image) ? "1.jpg" : @"C:\Users\dimch\Desktop\93jwxgJXMiY.jpg"));
 
-            var photos = _api.Photo.SaveMessagesPhoto(responseFile);
+                var photos = _api.Photo.SaveMessagesPhoto(responseFile);
 
-            _api.Messages.Send(new MessagesSendParams
-            {
-                Attachments = photos,
-                PeerId = command.GetPeerId()
-            });
-            
+                return new MessagesSendParams
+                {
+                    Attachments = photos,
+                    PeerId = command.GetPeerId()
+                };
+            }
+
             return null;
         }
         
