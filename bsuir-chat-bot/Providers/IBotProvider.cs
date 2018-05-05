@@ -11,15 +11,6 @@ namespace bsuir_chat_bot
         Unloaded,
         Unloadable
     }
-    
-    public interface IBotProvider
-    {
-        
-        Dictionary<string, Func<List<string>, string>> Functions
-        {
-            get;
-        }
-    }
 
     public abstract class VkBotProvider
     {
@@ -29,11 +20,11 @@ namespace bsuir_chat_bot
         
         public string GetAllHelp()
         {
-            var help = new StringBuilder();
+            var help = new StringBuilder($"[{GetType().Name}]\n");
 
             foreach (var function in Functions)
             {
-                help.AppendLine(function.Value);
+                help.AppendLine("/" + function.Value);
             }
 
             return help.ToString();
@@ -41,7 +32,12 @@ namespace bsuir_chat_bot
 
         public MessagesSendParams Handle(VkNet.Model.Message command)
         {
-            if (State != ProviderState.Loaded) return null;
+            if (State != ProviderState.Loaded)
+                return new MessagesSendParams()
+                {
+                    Message = $"{GetType().Name.PadLeft(20)} is not loaded",
+                    PeerId = command.GetPeerId()
+                };
 //            var color = Console.ForegroundColor;
 //            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}'");

@@ -37,7 +37,7 @@ namespace bsuir_chat_bot
         public VkApi Api { get; }
         private readonly Regex _botCommandRegex;
 
-        private Dictionary<VkBotProvider, int> Providers { get; }
+        public Dictionary<VkBotProvider, int> Providers { get; }
 
         private const int NumberOfWorkerThreads = 4;
 
@@ -212,7 +212,6 @@ namespace bsuir_chat_bot
                     {
                         var task = new Command(message, Functions[command].Handle);
                         Requests.Enqueue(task);
-                        Console.WriteLine("Request accepted");
 //                        Requests.Enqueue(message);
                     }
                 }

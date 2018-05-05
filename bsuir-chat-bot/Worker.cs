@@ -14,7 +14,7 @@ namespace bsuir_chat_bot
 
         public void Work()
         {
-            while (_bot.BotState == Bot.State.Running)
+            while (true)
             {
                 if (_bot.Requests.TryDequeue(out var task))
                 {

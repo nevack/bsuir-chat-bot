@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using NCalc;
 using VkNet.Model.RequestParams;
 
@@ -22,7 +23,15 @@ namespace bsuir_chat_bot
 
             Functions = new Dictionary<string, string>
             {
-                {"calc", "calc - evaluate expression" }
+                {"v", "v someexpr - evaluate expression.\n" +
+                      " Available expressions:\n" +
+                      " · Pow(x,y) - x in power of y.\n" +
+                      " · Sin(x) - sinus of x (x in radians)\n" +
+                      " · Cos(x) - cosinus of x\n" +
+                      " · Abs(x) - absolute value of x\n" +
+                      " · Fact(x) - factorial of x (must be in range [0..1491])\n" +
+                      " · Repeat(what, times) - repeat 'what' expression\n"
+                }
             };
         }
 
@@ -33,7 +42,7 @@ namespace bsuir_chat_bot
 
             void Repeat(string name, FunctionArgs argz)
             {
-                if (name == "Repeat")
+                if (name.ToLowerInvariant() == "repeat")
                 {
                     var ex = argz.Parameters[0];
                     ex.EvaluateFunction += Repeat;
@@ -42,23 +51,44 @@ namespace bsuir_chat_bot
                         (int) argz.Parameters[1].Evaluate()));
                 }
             }
-                        
-            expr.EvaluateFunction += Repeat;
 
-            var s = "Error! ";
+            void Factorial(string name, FunctionArgs argz)
+            {
+                if (name.ToLowerInvariant() == "fact")
+                {
+                    var fact = (int) argz.Parameters[0].Evaluate();
+                    
+                    if (fact < 0 || fact > 1491) 
+                        throw new ArgumentOutOfRangeException(nameof(fact), "Must be positive integer [0..1491].");
+                    
+                    BigInteger result = 1;
+                    
+                    for (var i = 2; i <= fact; i++)
+                    {
+                        result *= i;
+                    }
+
+                    argz.Result = result;
+                }
+            }
+
+            expr.EvaluateFunction += Repeat;
+            expr.EvaluateFunction += Factorial;
+
+            var message = "Error! ";
             try
             {
-                s = expr.Evaluate().ToString();
+                message = "Out[0] = " + expr.Evaluate();
             }
             catch (Exception e)
             {
-                s += e.Message;
+                message += e.Message;
             }
             
             return new MessagesSendParams()
             {
                 PeerId = command.GetPeerId(),
-                Message =  s
+                Message =  message
             };
         }
     }

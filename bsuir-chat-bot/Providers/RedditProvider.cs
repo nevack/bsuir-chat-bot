@@ -22,7 +22,7 @@ namespace bsuir_chat_bot
         {
             Functions = new Dictionary<string, string>
             {
-                {"r", "syntax: /r [hot|top|new] subreddit - get subreddit picture"}
+                {"r", "/r subreddit [hot|top|new] - get subreddit picture (default hot)"}
             };
 
             _api = api;
@@ -68,9 +68,8 @@ namespace bsuir_chat_bot
                     case "top":
                         listing = sub.GetTop(FromTime.Day);
                         break;
-                    
-                    case "hot":
-                    default:
+
+                    default: // "hot" also
                         listing = sub.Hot;
                         break;
                     
@@ -111,22 +110,34 @@ namespace bsuir_chat_bot
 
             var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
             var wc = new WebClient();
-                
-            var imageBytes = wc.DownloadData(image);
 
-            var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
-
-            var photos = _api.Photo.SaveMessagesPhoto(responseFile);
-
-            return new MessagesSendParams
+            try
             {
-                Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
-                Attachments = photos,
-                PeerId = command.GetPeerId()
-            };
+                var imageBytes = wc.DownloadData(image);
+
+                var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
+
+                var photos = _api.Photo.SaveMessagesPhoto(responseFile);
+
+                return new MessagesSendParams
+                {
+                    Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
+                    Attachments = photos,
+                    PeerId = command.GetPeerId()
+                };
+            }
+            catch (WebException)
+            {
+                return new MessagesSendParams
+                {
+                    Message = "Error getting image",
+                    PeerId = command.GetPeerId()
+                };
+            }
+
         }
         
-        private async Task<string> UploadImage(string url, byte[] data)
+        private static async Task<string> UploadImage(string url, byte[] data)
         {
             using (var client = new HttpClient())
             {

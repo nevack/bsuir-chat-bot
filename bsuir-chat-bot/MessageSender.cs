@@ -19,9 +19,9 @@ namespace bsuir_chat_bot
         {
             _millisecondsTimeout = 200;
 
-            while (_bot.BotState == Bot.State.Running)
+            while (true)
             {
-                if (_bot.Responses.TryDequeue(out var messageSend))
+                if (_bot.BotState == Bot.State.Running && _bot.Responses.TryDequeue(out var messageSend))
                 {
                     try
                     {
@@ -42,7 +42,7 @@ namespace bsuir_chat_bot
                         _bot.Responses.Enqueue(messageSend);
                     }
                     
-                    Console.WriteLine($"Sleep: {_millisecondsTimeout}ms");
+                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {"Bot message sender".PadLeft(20)} ]: Sleep: {_millisecondsTimeout}ms");
                     Thread.Sleep(_millisecondsTimeout);
                 }
                 else
