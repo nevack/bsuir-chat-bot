@@ -4,7 +4,7 @@
     {
         private static void Main()
         {
-            var bot = new Bot();
+            var bot = new Bot("botconfig.json");
             bot.Start();
         }
     }

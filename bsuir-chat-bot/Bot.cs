@@ -43,17 +43,22 @@ namespace bsuir_chat_bot
 
         public string GetUptime() => (DateTime.Now - _startTime).ToString(@"d\.hh\:mm\:ss");
 
-        public Bot()
+        public Bot(string configFileName)
         {
             _startTime = DateTime.Now;
+
+            if (!File.Exists(configFileName))
+            {
+                throw new FileNotFoundException("Can't find config file", configFileName);
+            }
             
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("botconfig.json");
-
-            var configuration = builder.Build();
+                .AddJsonFile(configFileName);
             
             Api = new VkApi(new NullLogger(new LogFactory()));
+
+            var configuration = builder.Build();
             
             var token = configuration["token"];
 
@@ -62,7 +67,6 @@ namespace bsuir_chat_bot
                 ApplicationId = ulong.Parse(configuration["appid"]),
                 Settings = Settings.All
             };
-
 
             if (token != null)
             {
@@ -110,8 +114,6 @@ namespace bsuir_chat_bot
             }
             
             Requests = new ConcurrentQueue<Command>();
-//            Requests = new ConcurrentQueue<VkNet.Model.Message>();
-//            Responses = new ConcurrentQueue<Response>();
             Responses = new ConcurrentQueue<MessagesSendParams>();
         }
 

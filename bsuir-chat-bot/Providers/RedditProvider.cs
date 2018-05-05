@@ -34,8 +34,32 @@ namespace bsuir_chat_bot
             command.MarkAsRead(_api);
             var (_, args) = command.ParseFunc();
 
-            var sub = _reddit.GetSubreddit(args[0]);
-            var posts = sub.GetTop(FromTime.Day).Take(20).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
+
+            Subreddit sub;
+            
+            try
+            {
+                sub = _reddit.GetSubreddit(args[0]);
+            }
+            catch (WebException)
+            {
+                return new MessagesSendParams
+                {
+                    Message = $"No sush subreddit: {args[0]}.",
+                    PeerId = command.GetPeerId()
+                };
+            }
+            
+            if (sub == null)
+            {
+                return new MessagesSendParams
+                {
+                    Message = $"No sush subreddit: {args[0]}.",
+                    PeerId = command.GetPeerId()
+                };
+            }
+            
+            var posts = sub.GetTop(FromTime.Day).Take(30).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
             
             var rand = new Random();
 
@@ -51,7 +75,7 @@ namespace bsuir_chat_bot
             var post = posts[rand.Next(0, posts.Count)];
             var image = post.Url.ToString();
 
-            if (post.NSFW)
+            if (command.IsFromChat() && post.NSFW)
             {
                 return new MessagesSendParams
                 {
@@ -71,6 +95,7 @@ namespace bsuir_chat_bot
 
             return new MessagesSendParams
             {
+                Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
                 Attachments = photos,
                 PeerId = command.GetPeerId()
             };

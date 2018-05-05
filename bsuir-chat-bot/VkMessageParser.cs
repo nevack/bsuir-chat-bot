@@ -49,6 +49,11 @@ namespace bsuir_chat_bot
             return messageList;
         }
 
+        public static bool IsFromChat(this VkNet.Model.Message message)
+        {
+            return message.ChatId.HasValue;
+        }
+
         public static long GetPeerId(this VkNet.Model.Message message)
         {
             return message.ChatId?.ToPeerId() ?? message.FromId.Value;
