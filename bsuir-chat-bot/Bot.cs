@@ -3,13 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using VkNet;
 using VkNet.Enums.Filters;
-using System.Net.Http;
-using Newtonsoft.Json;
 using NLog;
 using VkNet.Model.RequestParams;
 
@@ -23,23 +23,24 @@ namespace bsuir_chat_bot
             Sleep,
             Stoped
         }
+        
+        private const int NumberOfWorkerThreads = 4;
 
         public long[] Admins { get; }
         
         public State BotState { get; set; } = State.Stoped;
         
         private readonly HttpClient _client = new HttpClient();
+        
+        private readonly Regex _botCommandRegex;
         private readonly DateTime _startTime;
+        
+        public Dictionary<VkBotProvider, int> Providers { get; }
         public Dictionary<string, VkBotProvider> Functions { get; }
-        public ConcurrentQueue<Command> Requests { get; }
-        public ConcurrentQueue<MessagesSendParams> Responses { get; }
         
         public VkApi Api { get; }
-        private readonly Regex _botCommandRegex;
-
-        public Dictionary<VkBotProvider, int> Providers { get; }
-
-        private const int NumberOfWorkerThreads = 4;
+        public ConcurrentQueue<Command> Requests { get; }
+        public ConcurrentQueue<MessagesSendParams> Responses { get; }
 
         public string GetUptime() => (DateTime.Now - _startTime).ToString(@"d\.hh\:mm\:ss");
 
@@ -175,31 +176,38 @@ namespace bsuir_chat_bot
             senderThread.Start();
             
             long timestamp = -1;
-            var server = Api.Messages.GetLongPollServer();
-            
-            while (true)
+//            var server = Api.Messages.GetLongPollServer();
+            var longPool = Api.Messages.GetLongPollServer(true);
+
+            while (BotState != State.Stoped)
             {
-                var response = _client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
-                response.Wait();
+                var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
+                    Pts = longPool.Pts, Ts = longPool.Ts
+                });
+                longPool.Pts = response.NewPts;
                 
-                var responseString = response.Result.Content.ReadAsStringAsync().Result;
-                var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
-
-                try
-                {
-                    timestamp = responseDict["ts"];
-                }
-                catch (KeyNotFoundException)
-                {
-                    server = Api.Messages.GetLongPollServer();
-                    continue;
-                }
-
-                var messages = Api.ParseLongPollMessage(responseString);
-                if (messages == null) continue;
+//                var response = _client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
+//                response.Wait();
+//                
+//                var responseString = response.Result.Content.ReadAsStringAsync().Result;
+//                var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
+//
+//                try
+//                {
+//                    timestamp = responseDict["ts"];
+//                }
+//                catch (KeyNotFoundException)
+//                {
+//                    server = Api.Messages.GetLongPollServer();
+//                    continue;
+//                }
+//
+//                var messages = Api.ParseLongPollMessage(responseString);
                 
-                foreach (var message in messages)
+                foreach (var message in response.Messages)
                 {
+                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
+                    
                     var s = message.Body.Split(" ").ToList();
                 
                     var match = _botCommandRegex.Match(s[0]);
@@ -215,7 +223,11 @@ namespace bsuir_chat_bot
 //                        Requests.Enqueue(message);
                     }
                 }
+                
+                Thread.Sleep(350);
             }
+            
+            Console.WriteLine("System Halt! Bye.");
         }
 
         private static void PrintCredentials(IConfiguration configuration)

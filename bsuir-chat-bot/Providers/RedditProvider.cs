@@ -22,7 +22,7 @@ namespace bsuir_chat_bot
         {
             Functions = new Dictionary<string, string>
             {
-                {"r", "/r subreddit [hot|top|new] - get subreddit picture (default hot)"}
+                {"r", "r subreddit [hot|top|new] - get subreddit picture (default hot)"}
             };
 
             _api = api;

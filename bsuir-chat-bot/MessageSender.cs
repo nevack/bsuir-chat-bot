@@ -19,7 +19,7 @@ namespace bsuir_chat_bot
         {
             _millisecondsTimeout = 200;
 
-            while (true)
+            while (_bot.BotState != Bot.State.Stoped)
             {
                 if (_bot.BotState == Bot.State.Running && _bot.Responses.TryDequeue(out var messageSend))
                 {
