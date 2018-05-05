@@ -30,7 +30,7 @@ namespace bsuir_chat_bot
         
         private readonly HttpClient _client = new HttpClient();
         private readonly DateTime _startTime;
-        private readonly Dictionary<string, VkBotProvider> _functions;
+        public Dictionary<string, VkBotProvider> Functions { get; }
         public ConcurrentQueue<Command> Requests { get; }
         public ConcurrentQueue<MessagesSendParams> Responses { get; }
         
@@ -86,7 +86,7 @@ namespace bsuir_chat_bot
             
             _botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
-            _functions = new Dictionary<string, VkBotProvider>();
+            Functions = new Dictionary<string, VkBotProvider>();
 
             Providers = new Dictionary<VkBotProvider, int>
             {
@@ -95,7 +95,8 @@ namespace bsuir_chat_bot
                 [new SystemProvider(this)] = 1,
                 [new QuoteProvider("Fuhrer.json")] = 1,
                 [new MathProvider()] = 1,
-                [new FlipcoinProvider()] = 1
+                [new FlipcoinProvider()] = 1,
+                [new HelpProvider(this)]= 1
             };
             
             Admins = configuration.GetSection("admins").GetChildren().Select(c => long.Parse(c.Value)).ToArray();
@@ -104,7 +105,7 @@ namespace bsuir_chat_bot
             {
                 foreach (var func in module.Key.Functions)
                 {            
-                    _functions[func.Key] = module.Key;
+                    Functions[func.Key] = module.Key;
                 }
             }
             
@@ -205,9 +206,9 @@ namespace bsuir_chat_bot
                 
                     var command = match.Groups[1].Value.ToLower();
                    
-                    if (_functions.ContainsKey(command))
+                    if (Functions.ContainsKey(command))
                     {
-                        var task = new Command(message, _functions[command].Handle);
+                        var task = new Command(message, Functions[command].Handle);
                         Requests.Enqueue(task);
                         Console.WriteLine("Request accepted");
 //                        Requests.Enqueue(message);
