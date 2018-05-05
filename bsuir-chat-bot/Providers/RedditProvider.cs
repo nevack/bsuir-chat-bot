@@ -59,8 +59,33 @@ namespace bsuir_chat_bot
                 };
             }
             
-            var posts = sub.GetTop(FromTime.Day).Take(30).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
+            Listing<Post> listing;
             
+            if (args.Length > 1)
+            {
+                switch (args[1].ToLowerInvariant())
+                {
+                    case "top":
+                        listing = sub.GetTop(FromTime.Day);
+                        break;
+                    
+                    case "hot":
+                    default:
+                        listing = sub.Hot;
+                        break;
+                    
+                    case "new":
+                        listing = sub.New;
+                        break;
+                }
+            }
+            else
+            {
+                listing = sub.Hot;
+            }
+
+            var posts = listing.Take(50).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
+
             var rand = new Random();
 
             if (posts.Count == 0)
