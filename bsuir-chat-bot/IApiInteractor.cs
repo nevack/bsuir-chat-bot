@@ -5,11 +5,11 @@ namespace bsuir_chat_bot
 {
     public abstract class ApiInteractor
     {
-        protected ConcurrentQueue<Message> _outputQueue;
+        protected readonly ConcurrentQueue<Message> OutputQueue;
         
         protected ApiInteractor(ConcurrentQueue<Message> outputQueue)
         {
-            _outputQueue = outputQueue;
+            OutputQueue = outputQueue;
         }
         
         public abstract void SendMessage(Message message);

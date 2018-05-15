@@ -12,14 +12,14 @@ namespace bsuir_chat_bot
     {
         private readonly VkApi _api;
 
-        public VkSender(VkApi api)
+        protected VkSender(VkApi api)
         {
             _api = api;
         }
 
         public void Send(string message)
         {
-            throw new System.NotImplementedException();
+//            throw new System.NotImplementedException();
         }
         
         public void Send(VkNet.Model.Message message)

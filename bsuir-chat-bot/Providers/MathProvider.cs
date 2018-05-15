@@ -9,18 +9,16 @@ namespace bsuir_chat_bot
 {
     public class MathProvider: VkBotProvider
     {
-        private readonly Dictionary<string, object> _parameters;
+        private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>()
+        {
+            ["Pi"] = Math.PI,
+            ["pi"] = Math.PI,
+            ["E"] = Math.E,
+            ["e"] = Math.E
+        };
 
         public MathProvider()
         {
-            _parameters = new Dictionary<string, object>()
-            {
-                ["Pi"] = Math.PI,
-                ["pi"] = Math.PI,
-                ["E"] = Math.E,
-                ["e"] = Math.E
-            };
-
             Functions = new Dictionary<string, string>
             {
                 {"v", "v someexpr - evaluate expression.\n" +
