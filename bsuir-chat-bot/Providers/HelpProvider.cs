@@ -41,16 +41,17 @@ namespace bsuir_chat_bot
                 };
             }
             
-            if (!_bot.Functions.ContainsKey(args[0]))
-                return new MessagesSendParams
-                {
-                    Message = "No sush module",
-                    PeerId = command.GetPeerId()
-                };
+            if (!_bot.Functions.ContainsKey(args[0])) 
+                throw new KeyNotFoundException("No such module.");
+//                return new MessagesSendParams
+//                {
+//                    Message = "No suсh module",
+//                    PeerId = command.GetPeerId()
+//                };
 
             return new MessagesSendParams
             {
-                Message = _bot.Functions[args[0]].GetAllHelp(),
+                Message = _bot.Functions[args[0]].Functions[args[0]],
                 PeerId = command.GetPeerId()
             };
         }

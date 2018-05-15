@@ -117,47 +117,55 @@ namespace bsuir_chat_bot
             Responses = new ConcurrentQueue<MessagesSendParams>();
         }
 
-//        public void LoadAll()
-//        {
-//            foreach (var name in Providers.Keys)
-//            {
-//                LoadModule(name);
-//            }
-//        }
-//        
-//        public void UnloadAll()
-//        {
-//            foreach (var name in Providers.Keys)
-//            {
-//                UnloadModule(name);
-//            }
-//        }
-//
-//        public bool LoadModule(string name)
-//        {
-//            if (!Providers.ContainsKey(name)) return false;
-//            
-//            foreach (var function in Providers[name].Functions)
-//            {
-//                Functions.TryAdd(function.Key, function.Value);
-//            }
-//
-//            return true;
-//        }
-//
-//        public bool UnloadModule(string name)
-//        {
-//            if (!Providers.ContainsKey(name)) return false;
-//
-//            if (name == "system") return false;
-//            
-//            foreach (var function in Providers[name].Functions.Keys)
-//            {
-//                        Functions.Remove(function);
-//            }
-//
-//            return true;
-//        }
+        public void LoadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                LoadModule(name.GetName());
+            }
+        }
+        
+        public void UnloadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                UnloadModule(name.GetName());
+            }
+        }
+        
+        public bool LoadModule(string name)
+        {
+            var success = false;
+            foreach (var provider in Providers.Keys)
+            {
+                if (provider.GetName().Equals(name) && provider.State != ProviderState.Loaded)
+                {
+                    provider.State = ProviderState.Loaded;
+                    success = true;
+                    break;
+                }
+            }
+
+            return success;
+        }
+
+        public bool UnloadModule(string name)
+        {
+            if (name == "system") return false;
+            
+            var success = false;
+            foreach (var provider in Providers.Keys)
+            {
+                if (provider.GetName().Equals(name) && provider.State != ProviderState.Unloaded)
+                {
+                    provider.State = ProviderState.Unloaded;
+                    success = true;
+                    break;
+                }
+            }
+
+            return success;
+        }
     
         public void Start()
         {
@@ -204,7 +212,9 @@ namespace bsuir_chat_bot
                 
                 foreach (var message in response.Messages)
                 {
-                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
+                    if (message.Type == VkNet.Enums.MessageType.Sended) continue;
+//                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
+                    message.FromId = message.UserId;
                     
                     var s = message.Body.Split(" ").ToList();
                 
