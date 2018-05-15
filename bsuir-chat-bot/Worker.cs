@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace bsuir_chat_bot
 {
@@ -18,7 +19,14 @@ namespace bsuir_chat_bot
             {
                 if (_bot.Requests.TryDequeue(out var task))
                 {
-                    _bot.Responses.Enqueue(task.Function(task.Message));
+                    try
+                    {
+                        _bot.Responses.Enqueue(task.Function(task.Message));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("ERROR!: "+e.Message);
+                    }
                 }
                 else
                     Thread.Sleep(10);
