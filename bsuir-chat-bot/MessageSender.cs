@@ -17,7 +17,7 @@ namespace bsuir_chat_bot
 
         public void Work()
         {
-            _millisecondsTimeout = 200;
+            _millisecondsTimeout = 0;
 
             while (_bot.BotState != Bot.State.Stoped)
             {

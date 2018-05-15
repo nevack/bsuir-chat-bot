@@ -56,8 +56,9 @@ namespace bsuir_chat_bot
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(configFileName);
-            
+
             Api = new VkApi(new NullLogger(new LogFactory()));
+            Api.RequestsPerSecond = 3;
 
             var configuration = builder.Build();
             
@@ -181,13 +182,12 @@ namespace bsuir_chat_bot
 
             while (BotState != State.Stoped)
             {
+                
                 var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                     Pts = longPool.Pts, Ts = longPool.Ts
                 });
                 longPool.Pts = response.NewPts;
                 
-//                var response = _client.PostAsync($"https://{server.Server}?act=a_check&key={server.Key}&ts={timestamp}&wait=25&mode=2&version=2", null);
-//                response.Wait();
 //                
 //                var responseString = response.Result.Content.ReadAsStringAsync().Result;
 //                var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
