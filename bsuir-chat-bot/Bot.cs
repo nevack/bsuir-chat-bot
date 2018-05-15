@@ -3,11 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
@@ -30,7 +28,7 @@ namespace bsuir_chat_bot
         
         public State BotState { get; set; } = State.Stoped;
         
-        private readonly HttpClient _client = new HttpClient();
+//        private readonly HttpClient _client = new HttpClient();
         
         private readonly Regex _botCommandRegex;
         private readonly DateTime _startTime;
@@ -57,7 +55,7 @@ namespace bsuir_chat_bot
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(configFileName);
             
-            Api = new VkApi(new NullLogger(new LogFactory()));
+            Api = new VkApi(new NullLogger(new LogFactory()) );
 
             var configuration = builder.Build();
             
@@ -175,7 +173,7 @@ namespace bsuir_chat_bot
             var senderThread = new Thread(sender.Work);
             senderThread.Start();
             
-            long timestamp = -1;
+//            long timestamp = -1;
 //            var server = Api.Messages.GetLongPollServer();
             var longPool = Api.Messages.GetLongPollServer(true);
 

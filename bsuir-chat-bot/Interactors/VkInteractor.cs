@@ -81,7 +81,7 @@ namespace bsuir_chat_bot.Interactors
                 
                 foreach (var update in responseDict["updates"])
                     if (update[0] == INBOX_LP_FLAG)
-                        _outputQueue.Enqueue(ParseLongPollMessage(update));
+                        OutputQueue.Enqueue(ParseLongPollMessage(update));
             }
         }
         
