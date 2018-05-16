@@ -12,6 +12,7 @@ namespace bsuir_chat_bot
 
         internal SystemProvider(Bot bot)
         {
+            State = ProviderState.Unloadable;
             _bot = bot;
             Functions = new Dictionary<string, string>
             {

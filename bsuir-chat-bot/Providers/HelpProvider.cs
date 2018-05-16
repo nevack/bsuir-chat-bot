@@ -30,6 +30,7 @@ namespace bsuir_chat_bot
 
                 foreach (var provider in _bot.Providers.Keys)
                 {
+                    if (provider.State == ProviderState.Unloaded) continue;
                     s.Append(provider.GetAllHelp());
                     s.AppendLine();
                 }
