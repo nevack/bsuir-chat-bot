@@ -28,7 +28,7 @@ namespace bsuir_chat_bot
             {
                 var s = new StringBuilder();
 
-                foreach (var provider in _bot.Providers.Keys)
+                foreach (var provider in _bot.Providers.Values)
                 {
                     if (provider.State == ProviderState.Unloaded) continue;
                     s.Append(provider.GetAllHelp());

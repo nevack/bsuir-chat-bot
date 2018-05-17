@@ -33,7 +33,7 @@ namespace bsuir_chat_bot
         private readonly Regex _botCommandRegex;
         private readonly DateTime _startTime;
         
-        public Dictionary<VkBotProvider, int> Providers { get; }
+        public Dictionary<string, VkBotProvider> Providers { get; }
         public Dictionary<string, VkBotProvider> Functions { get; }
         
         public VkApi Api { get; }
@@ -92,24 +92,31 @@ namespace bsuir_chat_bot
 
             Functions = new Dictionary<string, VkBotProvider>();
 
-            Providers = new Dictionary<VkBotProvider, int>
+            var names = configuration.GetSection("modules").GetChildren().Select(name => name.Value).ToList();
+
+            Providers = new Dictionary<string, VkBotProvider>
             {
-                [new PingProvider()] = 1,
-                [new RedditProvider(Api)] = 1,
-                [new SystemProvider(this)] = 1,
-                [new QuoteProvider("Fuhrer.json")] = 1,
-                [new MathProvider()] = 1,
-                [new FlipcoinProvider()] = 1,
-                [new HelpProvider(this)]= 1
+                ["ping"] = new PingProvider(),
+                ["reddit"] = new RedditProvider(Api),
+                ["system"] = new SystemProvider(this),
+                ["quote"] = new QuoteProvider("Fuhrer.json"),
+                ["math"] = new MathProvider(),
+                ["flipcoin"] = new FlipcoinProvider(),
+                ["help"] = new HelpProvider(this),
             };
-            
+
+            foreach (var provider in Providers)
+            {
+                if (names.Contains(provider.Key)) provider.Value.State = ProviderState.Loaded;
+            }
+                        
             Admins = configuration.GetSection("admins").GetChildren().Select(c => long.Parse(c.Value)).ToArray();
             
-            foreach (var module in Providers)
+            foreach (var module in Providers.Values)
             {
-                foreach (var func in module.Key.Functions)
+                foreach (var func in module.Functions)
                 {            
-                    Functions[func.Key] = module.Key;
+                    Functions[func.Key] = module;
                 }
             }
             
@@ -121,7 +128,7 @@ namespace bsuir_chat_bot
         {
             foreach (var name in Providers.Keys)
             {
-                LoadModule(name.GetName());
+                LoadModule(name);
             }
         }
         
@@ -129,42 +136,30 @@ namespace bsuir_chat_bot
         {
             foreach (var name in Providers.Keys)
             {
-                UnloadModule(name.GetName());
+                UnloadModule(name);
             }
         }
         
         public bool LoadModule(string name)
         {
-            var success = false;
-            foreach (var provider in Providers.Keys)
-            {
-                if (provider.GetName().Equals(name) && provider.State != ProviderState.Loaded)
-                {
-                    provider.State = ProviderState.Loaded;
-                    success = true;
-                    break;
-                }
-            }
+            if (!Providers.ContainsKey(name)) return false;
+            
+            if (Providers[name].State != ProviderState.Unloaded) return false;
 
-            return success;
+            Providers[name].State = ProviderState.Loaded;
+
+            return true;
         }
 
         public bool UnloadModule(string name)
         {
-            if (name == "system") return false;
+            if (!Providers.ContainsKey(name)) return false;
             
-            var success = false;
-            foreach (var provider in Providers.Keys)
-            {
-                if (provider.GetName().Equals(name) && provider.State != ProviderState.Unloaded)
-                {
-                    provider.State = ProviderState.Unloaded;
-                    success = true;
-                    break;
-                }
-            }
+            if (Providers[name].State != ProviderState.Loaded) return false;
+            
+            Providers[name].State = ProviderState.Unloaded;
 
-            return success;
+            return true;
         }
     
         public void Start()
