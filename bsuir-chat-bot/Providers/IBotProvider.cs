@@ -41,7 +41,7 @@ namespace bsuir_chat_bot
 //                };
 //            var color = Console.ForegroundColor;
 //            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}'");
+            Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
 //            Console.ForegroundColor = color;
 
             return _handle(command);

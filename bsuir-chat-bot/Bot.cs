@@ -84,6 +84,7 @@ namespace bsuir_chat_bot
             {
                 Console.WriteLine("Failed to log in with credentials: ");
                 PrintCredentials(configuration);
+                return;
             }
 
             Console.WriteLine($"Started with token:\n{Api.Token}\n");
@@ -103,6 +104,7 @@ namespace bsuir_chat_bot
                 ["math"] = new MathProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
+                ["queue"] = new QueueProvider(this, Api)
             };
 
             foreach (var provider in Providers)
@@ -183,7 +185,6 @@ namespace bsuir_chat_bot
 
             while (BotState != State.Stoped)
             {
-                
                 var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                     Pts = longPool.Pts, Ts = longPool.Ts
                 });
