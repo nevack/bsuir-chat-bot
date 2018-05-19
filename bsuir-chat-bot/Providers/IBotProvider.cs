@@ -32,17 +32,18 @@ namespace bsuir_chat_bot
 
         public MessagesSendParams Handle(VkNet.Model.Message command)
         {
+//            var color = Console.ForegroundColor;
+//            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
+//            Console.ForegroundColor = color;
+            
             if (State == ProviderState.Unloaded)
-                throw new Exception($"{GetType().Name.PadLeft(20)} is not loaded");
+                throw new Exception($"{GetType().Name} is not loaded");
 //                return new MessagesSendParams()
 //                {
 //                    Message = $"{GetType().Name.PadLeft(20)} is not loaded",
 //                    PeerId = command.GetPeerId()
 //                };
-//            var color = Console.ForegroundColor;
-//            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
-//            Console.ForegroundColor = color;
 
             return _handle(command);
         }
