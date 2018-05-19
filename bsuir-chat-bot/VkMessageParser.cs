@@ -48,6 +48,11 @@ namespace bsuir_chat_bot
 
             return messageList;
         }
+        
+        public static string Truncate(this string value, int maxChars)
+        {
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars) + "...";
+        }
 
         public static bool IsFromChat(this VkNet.Model.Message message)
         {
