@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using VkNet.Model.RequestParams;
 
@@ -11,6 +12,7 @@ namespace bsuir_chat_bot
 
         internal SystemProvider(Bot bot)
         {
+            State = ProviderState.Unloadable;
             _bot = bot;
             Functions = new Dictionary<string, string>
             {
@@ -57,44 +59,44 @@ namespace bsuir_chat_bot
         
         private string GetUptime() => _bot.GetUptime();
 
-//        private string LoadModule(List<string> names)
-//        {
-//            if (names.Count == 1 && names[0].ToLower() == "all")
-//            {
-//                _bot.LoadAll();
-//                return "All modules were loaded";
-//            }
-//            
-//            var s = new StringBuilder();
-//            
-//            foreach (var name in names.Select(name => name.ToLower()))
-//            {
-//                s.Append($"Module \"{name}\" was ");
-//                s.AppendLine(_bot.LoadModule(name) ? "loaded" : "not loaded");
-//            }
-//
-//            return s.ToString();
-//        }
-//        
-//        private string UnloadModule(List<string> names)
-//        {
-//            if (names.Count == 1 && names[0].ToLower() == "all")
-//            {     
-//                _bot.UnloadAll();
-//
-//                return "All modules were unloaded";
-//            }
-//            
-//            var s = new StringBuilder();
-//            
-//            foreach (var name in names.Select(name => name.ToLower()))
-//            {
-//                s.Append($"Module \"{name}\" was ");
-//                s.AppendLine(_bot.UnloadModule(name) ? "unloaded" : "not unloaded");
-//            }
-//
-//            return s.ToString();
-//        }
+        private string LoadModule(IReadOnlyList<string> names)
+        {
+            if (names.Count == 1 && names[0].ToLower() == "all")
+            {
+                _bot.LoadAll();
+                return "All modules were loaded";
+            }
+            
+            var s = new StringBuilder();
+            
+            foreach (var name in names.Select(name => name.ToLower()))
+            {
+                s.Append($"Module \"{name}\" was ");
+                s.AppendLine(_bot.LoadModule(name) ? "loaded" : "not loaded");
+            }
+
+            return s.ToString();
+        }
+        
+        private string UnloadModule(IReadOnlyList<string> names)
+        {
+            if (names.Count == 1 && names[0].ToLower() == "all")
+            {     
+                _bot.UnloadAll();
+
+                return "All modules were unloaded";
+            }
+            
+            var s = new StringBuilder();
+            
+            foreach (var name in names.Select(name => name.ToLower()))
+            {
+                s.Append($"Module \"{name}\" was ");
+                s.AppendLine(_bot.UnloadModule(name) ? "unloaded" : "not unloaded");
+            }
+
+            return s.ToString();
+        }
         
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {
@@ -108,7 +110,7 @@ namespace bsuir_chat_bot
                 };
             }
             
-            var (func, _) = command.ParseFunc();
+            var (func, args) = command.ParseFunc();
 
             string message;
             
@@ -131,6 +133,14 @@ namespace bsuir_chat_bot
                 
                 case "uptime":
                     message = GetUptime();
+                    break;
+                
+                case "load":
+                    message = LoadModule(args);
+                    break;
+                
+                case "unload":
+                    message = UnloadModule(args);
                     break;
                 
                 default:

@@ -33,7 +33,7 @@ namespace bsuir_chat_bot
         private readonly Regex _botCommandRegex;
         private readonly DateTime _startTime;
         
-        public Dictionary<VkBotProvider, int> Providers { get; }
+        public Dictionary<string, VkBotProvider> Providers { get; }
         public Dictionary<string, VkBotProvider> Functions { get; }
         
         public VkApi Api { get; }
@@ -84,6 +84,7 @@ namespace bsuir_chat_bot
             {
                 Console.WriteLine("Failed to log in with credentials: ");
                 PrintCredentials(configuration);
+                return;
             }
 
             Console.WriteLine($"Started with token:\n{Api.Token}\n");
@@ -92,24 +93,32 @@ namespace bsuir_chat_bot
 
             Functions = new Dictionary<string, VkBotProvider>();
 
-            Providers = new Dictionary<VkBotProvider, int>
+            var names = configuration.GetSection("modules").GetChildren().Select(name => name.Value).ToList();
+
+            Providers = new Dictionary<string, VkBotProvider>
             {
-                [new PingProvider()] = 1,
-                [new RedditProvider(Api)] = 1,
-                [new SystemProvider(this)] = 1,
-                [new QuoteProvider("Fuhrer.json")] = 1,
-                [new MathProvider()] = 1,
-                [new FlipcoinProvider()] = 1,
-                [new HelpProvider(this)]= 1
+                ["ping"] = new PingProvider(),
+                ["reddit"] = new RedditProvider(Api),
+                ["system"] = new SystemProvider(this),
+                ["quote"] = new QuoteProvider("Fuhrer.json"),
+                ["math"] = new MathProvider(),
+                ["flipcoin"] = new FlipcoinProvider(),
+                ["help"] = new HelpProvider(this),
+                ["queue"] = new QueueProvider(this, Api)
             };
-            
+
+            foreach (var provider in Providers)
+            {
+                if (names.Contains(provider.Key)) provider.Value.State = ProviderState.Loaded;
+            }
+                        
             Admins = configuration.GetSection("admins").GetChildren().Select(c => long.Parse(c.Value)).ToArray();
             
-            foreach (var module in Providers)
+            foreach (var module in Providers.Values)
             {
-                foreach (var func in module.Key.Functions)
+                foreach (var func in module.Functions)
                 {            
-                    Functions[func.Key] = module.Key;
+                    Functions[func.Key] = module;
                 }
             }
             
@@ -117,47 +126,43 @@ namespace bsuir_chat_bot
             Responses = new ConcurrentQueue<MessagesSendParams>();
         }
 
-//        public void LoadAll()
-//        {
-//            foreach (var name in Providers.Keys)
-//            {
-//                LoadModule(name);
-//            }
-//        }
-//        
-//        public void UnloadAll()
-//        {
-//            foreach (var name in Providers.Keys)
-//            {
-//                UnloadModule(name);
-//            }
-//        }
-//
-//        public bool LoadModule(string name)
-//        {
-//            if (!Providers.ContainsKey(name)) return false;
-//            
-//            foreach (var function in Providers[name].Functions)
-//            {
-//                Functions.TryAdd(function.Key, function.Value);
-//            }
-//
-//            return true;
-//        }
-//
-//        public bool UnloadModule(string name)
-//        {
-//            if (!Providers.ContainsKey(name)) return false;
-//
-//            if (name == "system") return false;
-//            
-//            foreach (var function in Providers[name].Functions.Keys)
-//            {
-//                        Functions.Remove(function);
-//            }
-//
-//            return true;
-//        }
+        public void LoadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                LoadModule(name);
+            }
+        }
+        
+        public void UnloadAll()
+        {
+            foreach (var name in Providers.Keys)
+            {
+                UnloadModule(name);
+            }
+        }
+        
+        public bool LoadModule(string name)
+        {
+            if (!Providers.ContainsKey(name)) return false;
+            
+            if (Providers[name].State != ProviderState.Unloaded) return false;
+
+            Providers[name].State = ProviderState.Loaded;
+
+            return true;
+        }
+
+        public bool UnloadModule(string name)
+        {
+            if (!Providers.ContainsKey(name)) return false;
+            
+            if (Providers[name].State != ProviderState.Loaded) return false;
+            
+            Providers[name].State = ProviderState.Unloaded;
+
+            return true;
+        }
     
         public void Start()
         {
@@ -180,7 +185,6 @@ namespace bsuir_chat_bot
 
             while (BotState != State.Stoped)
             {
-                
                 var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                     Pts = longPool.Pts, Ts = longPool.Ts
                 });
@@ -204,7 +208,9 @@ namespace bsuir_chat_bot
                 
                 foreach (var message in response.Messages)
                 {
-                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
+                    if (message.Type == VkNet.Enums.MessageType.Sended) continue;
+//                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
+                    message.FromId = message.UserId;
                     
                     var s = message.Body.Split(" ").ToList();
                 

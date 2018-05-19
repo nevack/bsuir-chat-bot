@@ -16,7 +16,7 @@ namespace bsuir_chat_bot
     {
         public Dictionary<string, string> Functions { get; protected set; }
 
-        public ProviderState State { get; set; } = ProviderState.Loaded;
+        public ProviderState State { get; set; } = ProviderState.Unloaded;
         
         public string GetAllHelp()
         {
@@ -32,18 +32,25 @@ namespace bsuir_chat_bot
 
         public MessagesSendParams Handle(VkNet.Model.Message command)
         {
-            if (State != ProviderState.Loaded)
-                return new MessagesSendParams()
-                {
-                    Message = $"{GetType().Name.PadLeft(20)} is not loaded",
-                    PeerId = command.GetPeerId()
-                };
 //            var color = Console.ForegroundColor;
 //            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}'");
+            Console.WriteLine($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
 //            Console.ForegroundColor = color;
+            
+            if (State == ProviderState.Unloaded)
+                throw new Exception($"{GetType().Name} is not loaded");
+//                return new MessagesSendParams()
+//                {
+//                    Message = $"{GetType().Name.PadLeft(20)} is not loaded",
+//                    PeerId = command.GetPeerId()
+//                };
 
             return _handle(command);
+        }
+
+        public string GetName()
+        {
+            return GetType().Name.ToLowerInvariant().Replace("provider", "");
         }
         
         protected abstract MessagesSendParams _handle(VkNet.Model.Message command);

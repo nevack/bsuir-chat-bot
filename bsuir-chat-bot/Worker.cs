@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
@@ -25,7 +26,11 @@ namespace bsuir_chat_bot
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("ERROR!: "+e.Message);
+                        _bot.Responses.Enqueue(new MessagesSendParams()
+                        {
+                            PeerId = task.Message.GetPeerId(),
+                            Message = e.Message
+                        });
                     }
                 }
                 else

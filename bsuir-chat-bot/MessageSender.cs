@@ -41,8 +41,9 @@ namespace bsuir_chat_bot
                             : throw e;
                         _bot.Responses.Enqueue(messageSend);
                     }
-                    
-                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()} [ {"Bot message sender".PadLeft(20)} ]: Sleep: {_millisecondsTimeout}ms");
+
+                    Console.WriteLine(
+                        $"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {"Bot message sender".PadLeft(20)} ]: Sent response '{messageSend.Message.Replace(Environment.NewLine, "").Truncate(32)}'");
                     Thread.Sleep(_millisecondsTimeout);
                 }
                 else

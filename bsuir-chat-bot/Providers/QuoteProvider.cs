@@ -20,7 +20,8 @@ namespace bsuir_chat_bot
             _random = new Random();
             Functions = new Dictionary<string, string>
             {
-                {"quote", "quote - get random quote"}
+                {"quote", "quote [number] - get random quote or defined with number\n" +
+                          $"(quotes available: {_quotedict.Quotes.Count - 1})" }
                 
             };
         }
