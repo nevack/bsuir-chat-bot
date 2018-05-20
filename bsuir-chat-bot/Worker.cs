@@ -4,14 +4,7 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    Mental meltdown
-    It is not true    
-    It's bullshit
-    // I did not hit hit her
-    // I did not
-    // ...
-    // Oh, hi mark!    
-   
+
     public class Worker
     {
         private readonly Bot _bot;
