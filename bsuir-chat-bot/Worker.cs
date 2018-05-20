@@ -4,7 +4,7 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    
+    // Oh, hi mark!    
     public class Worker
     {
         private readonly Bot _bot;
