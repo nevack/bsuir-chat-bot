@@ -4,7 +4,7 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {
-    
+    It is not true    
     It's bullshit
     // I did not hit hit her
     // I did not
