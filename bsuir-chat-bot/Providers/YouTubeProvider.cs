@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -18,8 +19,8 @@ namespace bsuir_chat_bot
 
         private static string GetVid(string videoId)
         {
-            Process.Start(
-                "youtube-dl --write-info-json --geo-bypass --max-filesize 300m -o \"Download/%(id)s/video.%(ext)s\" -f mp4 {0}");
+            Process.Start($"youtube-dl --write-info-json --geo-bypass -o \"Download/%(id)s/video.%(ext)s\" -f mp4 {videoId}");
+            Console.WriteLine("keklol");
             return "";
 
         }

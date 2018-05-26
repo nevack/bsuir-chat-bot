@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
+using VkNet.Exception;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -105,7 +106,8 @@ namespace bsuir_chat_bot
                 ["math"] = new MathProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
-                ["queue"] = new QueueProvider(this, Api)
+                ["queue"] = new QueueProvider(this, Api),
+                ["yt"] = new YouYubeProvider()
             };
 
             foreach (var provider in Providers)
@@ -188,13 +190,21 @@ namespace bsuir_chat_bot
             var longPool = Api.Messages.GetLongPollServer(true);
             while (BotState != State.Stoped)
             {
-                var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null);	
-                r.Wait();
+                try
+                {
+                    var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null);	
+                    r.Wait();
                 
-                var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
-                    Pts = longPool.Pts, Ts = longPool.Ts
-                });
-                longPool.Pts = response.NewPts;
+                    var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
+                        Pts = longPool.Pts, Ts = longPool.Ts
+                    });
+                    longPool.Pts = response.NewPts;
+                }
+                catch (TooManyRequestsException e)
+                {
+                    Thread.Sleep(500);
+                    continue;
+                }
                 
                 foreach (var message in response.Messages)
                 {
@@ -215,7 +225,6 @@ namespace bsuir_chat_bot
 //                        Requests.Enqueue(message);
                     }
                 }
-                Thread.Sleep(500);
             }
             
             Console.WriteLine("System Halt! Bye.");
