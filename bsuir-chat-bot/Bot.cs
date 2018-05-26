@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,7 @@ namespace bsuir_chat_bot
         
         public State BotState { get; set; } = State.Stoped;
         
-//        private readonly HttpClient _client = new HttpClient();
+        private readonly HttpClient _client = new HttpClient();
         
         private readonly Regex _botCommandRegex;
         private readonly DateTime _startTime;
@@ -177,41 +178,28 @@ namespace bsuir_chat_bot
             
             var sender = new MessageSender(this);
             var senderThread = new Thread(sender.Work);
+            var pollerThread = new Thread(StartLongPolling);
+            pollerThread.Start();
             senderThread.Start();
-            
-//            long timestamp = -1;
-//            var server = Api.Messages.GetLongPollServer();
-            var longPool = Api.Messages.GetLongPollServer(true);
+        }
 
+        private void StartLongPolling()
+        {
+            var longPool = Api.Messages.GetLongPollServer(true);
             while (BotState != State.Stoped)
             {
+                var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null);	
+                r.Wait();
+                
                 var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                     Pts = longPool.Pts, Ts = longPool.Ts
                 });
                 longPool.Pts = response.NewPts;
                 
-//                
-//                var responseString = response.Result.Content.ReadAsStringAsync().Result;
-//                var responseDict = JsonConvert.DeserializeObject<Dictionary<dynamic, dynamic>>(responseString);
-//
-//                try
-//                {
-//                    timestamp = responseDict["ts"];
-//                }
-//                catch (KeyNotFoundException)
-//                {
-//                    server = Api.Messages.GetLongPollServer();
-//                    continue;
-//                }
-//
-//                var messages = Api.ParseLongPollMessage(responseString);
-                
                 foreach (var message in response.Messages)
                 {
                     if (message.Type == VkNet.Enums.MessageType.Sended) continue;
-//                    message.FromId = message.Type == VkNet.Enums.MessageType.Sended ? Api.UserId : message.UserId;
                     message.FromId = message.UserId;
-                    
                     var s = message.Body.Split(" ").ToList();
                 
                     var match = _botCommandRegex.Match(s[0]);
@@ -227,12 +215,12 @@ namespace bsuir_chat_bot
 //                        Requests.Enqueue(message);
                     }
                 }
-                
-                Thread.Sleep(350);
+                Thread.Sleep(500);
             }
             
             Console.WriteLine("System Halt! Bye.");
         }
+        
 
         private static void PrintCredentials(IConfiguration configuration)
         {

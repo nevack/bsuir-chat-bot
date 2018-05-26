@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.34" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.33.1.1226" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
