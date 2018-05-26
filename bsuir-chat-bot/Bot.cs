@@ -199,31 +199,31 @@ namespace bsuir_chat_bot
                         Pts = longPool.Pts, Ts = longPool.Ts
                     });
                     longPool.Pts = response.NewPts;
+                    
+                    foreach (var message in response.Messages)
+                    {
+                        if (message.Type == VkNet.Enums.MessageType.Sended) continue;
+                        message.FromId = message.UserId;
+                        var s = message.Body.Split(" ").ToList();
+                
+                        var match = _botCommandRegex.Match(s[0]);
+
+                        if (!match.Success) continue;
+                
+                        var command = match.Groups[1].Value.ToLower();
+                   
+                        if (Functions.ContainsKey(command))
+                        {
+                            var task = new Command(message, Functions[command].Handle);
+                            Requests.Enqueue(task);
+//                        Requests.Enqueue(message);
+                        }
+                    }
                 }
                 catch (TooManyRequestsException e)
                 {
                     Thread.Sleep(500);
                     continue;
-                }
-                
-                foreach (var message in response.Messages)
-                {
-                    if (message.Type == VkNet.Enums.MessageType.Sended) continue;
-                    message.FromId = message.UserId;
-                    var s = message.Body.Split(" ").ToList();
-                
-                    var match = _botCommandRegex.Match(s[0]);
-
-                    if (!match.Success) continue;
-                
-                    var command = match.Groups[1].Value.ToLower();
-                   
-                    if (Functions.ContainsKey(command))
-                    {
-                        var task = new Command(message, Functions[command].Handle);
-                        Requests.Enqueue(task);
-//                        Requests.Enqueue(message);
-                    }
                 }
             }
             
