@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VkNet;
 using VkNet.Model;
 using VkNet.Model.Attachments;
@@ -55,17 +56,17 @@ namespace bsuir_chat_bot
                     NoComments = true
                 });
             
-            dynamic parsed_resp;
+            dynamic parsedResp;
             try
             {
                 var resp = UploadVideo(server.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
-                parsed_resp = JsonConvert.DeserializeObject(resp);
+                parsedResp = JsonConvert.DeserializeObject(resp);
             }
             finally
             {
                 Directory.Delete($"../download/{id}", true);
             }
-            return ("", parsed_resp["video_id"]);
+            return ("", parsedResp["video_id"]);
         }
         
         private static async Task<string> UploadVideo(string url, string filepath)
@@ -104,7 +105,7 @@ namespace bsuir_chat_bot
             var param = new MessagesSendParams
             {
                 Message = message,
-                Attachments = attachement == 0 ? null : new List<MediaAttachment>{new Video{OwnerId = _api.UserId, Id = attachement}},
+                Attachments = new List<MediaAttachment>{new Video{OwnerId = _api.UserId, Id = attachement}},
                 PeerId = command.GetPeerId()
             };
 
