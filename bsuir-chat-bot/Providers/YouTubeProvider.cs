@@ -90,15 +90,24 @@ namespace bsuir_chat_bot
         {
             using (var client = new HttpClient())
             {
-                var requestContent = new MultipartFormDataContent();
-                var fileStreamContent = new StreamContent(new FileStream(filepath, FileMode.Open));
+                try
+                {
+                    var requestContent = new MultipartFormDataContent();
+                    var fileStreamContent = new StreamContent(new FileStream(filepath, FileMode.Open));
+
+                    fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                    requestContent.Add(fileStreamContent);
+
+                    var response = await client.PostAsync(url, requestContent);
+
+                    return Encoding.ASCII.GetString(await response.Content.ReadAsByteArrayAsync());
+                }
+                catch (Exception e)
+                {
+                    Console.Write(e);
+                    throw;
+                }
                 
-                fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
-                requestContent.Add(fileStreamContent);
-
-                var response = await client.PostAsync(url, requestContent);
-
-                return Encoding.ASCII.GetString(await response.Content.ReadAsByteArrayAsync());
             }
         }
         
