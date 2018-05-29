@@ -74,7 +74,7 @@ namespace bsuir_chat_bot
                 dynamic parsedResp = JsonConvert.DeserializeObject(resp);
                 var t = parsedResp["video_hash"];
             }
-            catch
+            catch (KeyNotFoundException e)
             {
                 throw new Exception("Upload failed");
             }
