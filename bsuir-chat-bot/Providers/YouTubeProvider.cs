@@ -97,6 +97,7 @@ namespace bsuir_chat_bot
 
                     fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
                     requestContent.Add(fileStreamContent);
+                    client.Timeout = TimeSpan.MaxValue;
 
                     var response = await client.PostAsync(url, requestContent);
 
