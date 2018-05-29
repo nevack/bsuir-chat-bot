@@ -63,7 +63,7 @@ namespace bsuir_chat_bot
                 new VideoSaveParams
                 {
                     Name = title,
-                    Description = data["description"],
+                    Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"\n"+data["description"],
                     NoComments = true
                 });
 
@@ -97,7 +97,7 @@ namespace bsuir_chat_bot
 
                     fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
                     requestContent.Add(fileStreamContent);
-                    client.Timeout = TimeSpan.FromMinutes(10);
+                    client.Timeout = TimeSpan.FromMinutes(30);
 
                     var response = await client.PostAsync(url, requestContent);
 
