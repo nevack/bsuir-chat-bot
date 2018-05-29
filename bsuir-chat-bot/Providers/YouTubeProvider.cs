@@ -71,10 +71,11 @@ namespace bsuir_chat_bot
             {
                 var wc = new WebClient();
                 var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
+                Console.WriteLine(resp);
                 dynamic parsedResp = JsonConvert.DeserializeObject(resp);
                 var t = parsedResp["video_hash"];
             }
-            catch (KeyNotFoundException e)
+            catch
             {
                 throw new Exception("Upload failed");
             }
