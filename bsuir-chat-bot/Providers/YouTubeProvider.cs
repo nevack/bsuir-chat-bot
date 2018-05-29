@@ -70,8 +70,8 @@ namespace bsuir_chat_bot
             try
             {
                 var wc = new WebClient();
-                var responseFile = Encoding.ASCII.GetString(wc.UploadFile(vid.UploadUrl, $"../download/{id}/video.mp4"));
-                dynamic parsedResp = JsonConvert.DeserializeObject(responseFile);
+                var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
+                dynamic parsedResp = JsonConvert.DeserializeObject(resp);
                 var t = parsedResp["video_hash"];
             }
             catch (KeyNotFoundException e)
@@ -84,6 +84,22 @@ namespace bsuir_chat_bot
             }
 
             return ("", vid);
+        }
+        
+        private static async Task<string> UploadVideo(string url, string filepath)
+        {
+            using (var client = new HttpClient())
+            {
+                var requestContent = new MultipartFormDataContent();
+                var fileStreamContent = new StreamContent(new FileStream(filepath, FileMode.Open));
+                
+                fileStreamContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                requestContent.Add(fileStreamContent);
+
+                var response = await client.PostAsync(url, requestContent);
+
+                return Encoding.ASCII.GetString(await response.Content.ReadAsByteArrayAsync());
+            }
         }
         
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
