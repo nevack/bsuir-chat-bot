@@ -59,25 +59,32 @@ namespace bsuir_chat_bot
             if (found.Count == 1)
                 return ("", found[0]);
             
+            var vid = _api.Video.Save(
+                new VideoSaveParams
+                {
+                    Name = title,
+                    Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"    "+data["description"],
+                    NoComments = true
+                });
+            
             foreach (var format in formats)
             {
                 var p = Process.Start("youtube-dl",  $"--geo-bypass --max-filesize 2048m -o \"../download/%(id)s/video.%(ext)s\" -f {format} {id}");
                 p?.WaitForExit();
-            
-                var vid = _api.Video.Save(
-                    new VideoSaveParams
-                    {
-                        Name = title,
-                        Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"    "+data["description"],
-                        NoComments = true
-                    });
 
-                var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
-                Console.WriteLine(resp);
-                
-                Directory.Delete($"../download/{id}", true);
-                if (!resp.Contains("video_hash"))
+                try
+                {
+                    var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
+                    Console.WriteLine(resp);
+
+                    Directory.Delete($"../download/{id}", true);
+                    if (!resp.Contains("video_hash"))
+                        continue;
+                }
+                catch (FileNotFoundException)
+                {
                     continue;
+                }
 
                 return (format, vid);
                 
