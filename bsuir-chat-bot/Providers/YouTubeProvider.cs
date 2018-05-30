@@ -72,12 +72,8 @@ namespace bsuir_chat_bot
                 var wc = new WebClient();
                 var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
                 Console.WriteLine(resp);
-                dynamic parsedResp = JsonConvert.DeserializeObject(resp);
-                var t = parsedResp["video_hash"];
-            }
-            catch
-            {
-                throw new Exception("Upload failed");
+                if (!resp.Contains("video_hash"))
+                    throw new Exception("Upload failed");
             }
             finally
             {
