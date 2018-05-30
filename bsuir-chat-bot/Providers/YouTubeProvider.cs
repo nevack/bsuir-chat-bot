@@ -38,7 +38,14 @@ namespace bsuir_chat_bot
 
             var id = match.Groups[1].Value;
             Console.WriteLine(id);
-            var formats = new List<string>{"bestvideo[ext=mp4]+bestaudio[ext=m4a]", "best[ext=mp4]", "bestvideo[height<=480]+bestaudio"};
+            var formats = new List<string>{
+                "best[ext=mp4]",
+                "bestvideo[ext=mp4]+bestaudio[ext=m4a]",
+                "bestvideo[height<=720]+bestaudio",
+                "bestvideo[height<=480]+bestaudio",
+                "bestvideo[height<=360]+bestaudio"
+                
+            };
             
             var getJson = Process.Start("youtube-dl",  $"--write-info-json --geo-bypass --max-filesize 2048m --skip-download -o \"../download/%(id)s/video.%(ext)s\" -f mp4 {id}");
             getJson?.WaitForExit();
