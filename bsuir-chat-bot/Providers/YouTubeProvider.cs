@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -39,6 +40,7 @@ namespace bsuir_chat_bot
             var id = match.Groups[1].Value;
             Console.WriteLine(id);
             var formats = new List<string>{
+                "best[height<=1080]",
                 "best[ext=mp4]",
                 "bestvideo[ext=mp4]+bestaudio[ext=m4a]",
                 "bestvideo[height<=720]+bestaudio",
@@ -59,25 +61,28 @@ namespace bsuir_chat_bot
             if (found.Count == 1)
                 return ("", found[0]);
             
-            var vid = _api.Video.Save(
-                new VideoSaveParams
-                {
-                    Name = title,
-                    Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"    "+data["description"],
-                    NoComments = true
-                });
-            
             foreach (var format in formats)
             {
                 var p = Process.Start("youtube-dl",  $"--geo-bypass --max-filesize 2048m -o \"../download/%(id)s/video.%(ext)s\" -f {format} {id}");
                 p?.WaitForExit();
+                
+                var vid = _api.Video.Save(
+                    new VideoSaveParams
+                    {
+                        Name = title,
+                        Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"    "+data["description"],
+                        NoComments = true
+                    });
 
                 try
                 {
-                    var resp = UploadVideo(vid.UploadUrl.ToString(), $"../download/{id}/video.mp4").Result;
+                    var files = Directory.GetFiles($"../download/{id}");
+                    var vidfile = files.Except(new List<string> {$"../download/{id}/video.info.json"}).First();
+                    Console.WriteLine(vidfile);
+                    var resp = UploadVideo(vid.UploadUrl.ToString(), vidfile).Result;
                     Console.WriteLine(resp);
+                    File.Delete(vidfile);
 
-                    Directory.Delete($"../download/{id}", true);
                     if (!resp.Contains("video_hash"))
                         continue;
                 }
@@ -85,10 +90,13 @@ namespace bsuir_chat_bot
                 {
                     continue;
                 }
+                
+                Directory.Delete($"../download/{id}", true);
 
                 return (format, vid);
                 
             }
+            Directory.Delete($"../download/{id}", true);
             throw new ApplicationException("Upload failed");
         }
         
