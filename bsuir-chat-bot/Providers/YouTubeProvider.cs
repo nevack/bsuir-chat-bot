@@ -63,7 +63,7 @@ namespace bsuir_chat_bot
                 new VideoSaveParams
                 {
                     Name = title,
-                    Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id+"\n"+data["description"],
+                    Description = "THIS VIDEO ON YOUTUBE: https://www.youtube.com/watch?v="+id,
                     NoComments = true
                 });
 
