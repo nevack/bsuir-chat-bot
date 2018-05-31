@@ -7,7 +7,7 @@ namespace bsuir_chat_bot
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     [UsedImplicitly]
-    public class QuoteDictionary
+    public class Author
     {
         public string AuthorId { get; set; }
         public string AuthorName { get; set; }

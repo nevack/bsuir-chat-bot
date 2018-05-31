@@ -103,7 +103,7 @@ namespace bsuir_chat_bot
                 ["ping"] = new PingProvider(),
                 ["reddit"] = new RedditProvider(Api),
                 ["system"] = new SystemProvider(this),
-                ["quote"] = new QuoteProvider("Fuhrer.json"),
+                ["quote"] = new QuoteProvider(),
                 ["math"] = new MathProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
