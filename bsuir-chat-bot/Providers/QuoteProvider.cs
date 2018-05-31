@@ -30,7 +30,8 @@ namespace bsuir_chat_bot
             {
                 {"quote", $"quote [author] [number] - get a quote by this author with a specified number (random if no number given) (quotes available: {sum - 1})"},
                 {"addquote", "addquote - add new quotes from forwarded messages"},
-                {"addauthor", "addauthor [nickname] [id] - add a new author to the quote list"}
+                {"addauthor", "addauthor [nickname] [id] - add a new author to the quote list"},
+                {"listauthors", "listauthors - list all authors"}
             };
         }
 
@@ -97,7 +98,6 @@ namespace bsuir_chat_bot
             return output;
         }
         
-
         protected override MessagesSendParams _handle(Message command)
         {
             var (func, args) = command.ParseFunc();
@@ -134,6 +134,9 @@ namespace bsuir_chat_bot
                     SaveQuotes();
                     ReloadQuotes();
                     message = $"Added author [{args[0]}|{args[1]}]";
+                    break;
+                case "listauthors":
+                    _quotedict.ToList().ForEach(pair => message+=$"{pair.Value.AuthorName} - {pair.Value.Quotes.Count} quotes");
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
