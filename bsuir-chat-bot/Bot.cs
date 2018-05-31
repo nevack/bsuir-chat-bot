@@ -107,7 +107,8 @@ namespace bsuir_chat_bot
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
                 ["queue"] = new QueueProvider(this, Api),
-                ["yt"] = new YouTubeProvider(Api)
+                ["yt"] = new YouTubeProvider(Api),
+                ["stats"] = new StatsProvider(Api)
             };
 
             foreach (var provider in Providers)
