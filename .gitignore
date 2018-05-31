@@ -429,3 +429,5 @@ fabric.properties
 /bsuir-chat-bot/bin/*
 bsuir-chat-bot/queues/
 /download
+/queues
+/quotes
