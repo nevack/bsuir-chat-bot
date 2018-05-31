@@ -175,7 +175,7 @@ namespace bsuir_chat_bot
             
             for (var i = 0; i < NumberOfWorkerThreads; i++)
             {
-                var worker = new Worker(this);
+                var worker = new MessageWorker(this);
                 var workerThread = new Thread(worker.Work);
                 workerThread.Start();
             }
