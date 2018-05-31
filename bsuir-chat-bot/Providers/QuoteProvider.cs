@@ -133,6 +133,7 @@ namespace bsuir_chat_bot
                         });
                     SaveQuotes();
                     ReloadQuotes();
+                    message = $"Added author [{args[0]}|{args[1]}]";
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
