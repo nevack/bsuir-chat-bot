@@ -82,7 +82,7 @@ namespace bsuir_chat_bot
                     var target = _quotedict.First(pair => pair.Value.AuthorId == message.UserId.ToString()).Value;
                     if (target.Quotes.All(quote => quote.Text != message.Body))
                     {
-                        if (message.Date != null)
+                        if (message.Date != null && message.Body.Length != 0)
                             target.Quotes.Add(new Quote
                             {
                                 AddedBy = sender.ToString(),
@@ -135,7 +135,7 @@ namespace bsuir_chat_bot
                         });
                     SaveQuotes();
                     ReloadQuotes();
-                    message = $"Added author [{args[0]}|{args[1]}]";
+                    message = $"Added author [id{args[1]}|{args[0]}]";
                     break;
                 case "listauthors":
                     _quotedict.ToList().ForEach(pair => message+=$"[id{pair.Value.AuthorId}|{pair.Value.AuthorName}] - {pair.Value.Quotes.Count}\n");
