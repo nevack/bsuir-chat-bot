@@ -136,7 +136,7 @@ namespace bsuir_chat_bot
                     message = $"Added author [{args[0]}|{args[1]}]";
                     break;
                 case "listauthors":
-                    _quotedict.ToList().ForEach(pair => message+=$"{pair.Value.AuthorName} - {pair.Value.Quotes.Count} quotes");
+                    _quotedict.ToList().ForEach(pair => message+=$"[{pair.Value.AuthorName}|id{pair.Value.AuthorId}] - {pair.Value.Quotes.Count} quotes\n");
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
