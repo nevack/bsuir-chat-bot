@@ -87,6 +87,7 @@ namespace bsuir_chat_bot
                                 AddedDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds(),
                                 Text = message.Body
                             });
+                        target.UpdateDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds();
                         output += $"Added quote No. {target.Quotes.Count-1} by {target.AuthorName}\n";
                     }
                 }
@@ -116,6 +117,22 @@ namespace bsuir_chat_bot
                         SaveQuotes();
                         ReloadQuotes();
                     }
+                    break;
+                case "addauthor":
+                    if (_quotedict.ContainsKey(args[0]) || _quotedict.Any(pair => pair.Value.AuthorId == args[1].ToString()))
+                        throw new ArgumentException("This author is already present");
+                    if (command.FromId != null)
+                        _quotedict.Add(args[0], new Author
+                        {
+                            AuthorId = args[1],
+                            AuthorName = args[0],
+                            CreationDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds(),
+                            Quotes = new List<Quote>(),
+                            CreatorId = command.FromId.Value.ToString(),
+                            UpdateDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds()
+                        });
+                    SaveQuotes();
+                    ReloadQuotes();
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
