@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
@@ -60,18 +61,39 @@ namespace bsuir_chat_bot
             }
         }
 
-        private string AddQuotes(Message msg)
+        private void SaveQuotes()
+        {
+            foreach (var author in _quotedict.Values)
+                File.WriteAllText(author.AuthorName+".json", JsonConvert.SerializeObject(author));
+        }
+
+        private string AddQuotes(Message msg, long sender)
         {
             if (msg.ForwardedMessages == null)
                 return "";
+            var output = "";
             foreach (var message in msg.ForwardedMessages)
             {
-                if (_quotedict.Values.Any(x => x.AuthorId == message.FromId.ToString()))
+                if (_quotedict.Values.Any(x => x.AuthorId == message.UserId.ToString()))
                 {
-                    if (_quotedict.Value.Quotes.Count)
+                    var target = _quotedict.First(pair => pair.Value.AuthorId == message.UserId.ToString()).Value;
+                    if (target.Quotes.All(quote => quote.Text != message.Body))
+                    {
+                        if (message.Date != null)
+                            target.Quotes.Add(new Quote
+                            {
+                                AddedBy = sender.ToString(),
+                                OriginalDate = ((DateTimeOffset) message.Date.Value).ToUnixTimeSeconds(),
+                                AddedDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds(),
+                                Text = message.Body
+                            });
+                        output += $"Added quote No. {target.Quotes.Count-1} by {target.AuthorName}\n";
+                    }
                 }
-                    
+                output += AddQuotes(message, sender);
             }
+
+            return output;
         }
         
 
@@ -79,7 +101,7 @@ namespace bsuir_chat_bot
         {
             var (func, args) = command.ParseFunc();
 
-            string message;
+            var message = "";
 
             switch (func)
             {
@@ -87,7 +109,9 @@ namespace bsuir_chat_bot
                     message = GetQuoteString(args);
                     break;
                 case "addquote":
-                    message = AddQuotes(command);
+                    if (command.UserId != null) message = AddQuotes(command, command.UserId.Value);
+                    if (message == "") message = "No new quotes added";
+                    SaveQuotes();
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
