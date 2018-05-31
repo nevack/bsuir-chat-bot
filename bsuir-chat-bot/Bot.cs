@@ -103,7 +103,7 @@ namespace bsuir_chat_bot
                 ["ping"] = new PingProvider(),
                 ["reddit"] = new RedditProvider(Api),
                 ["system"] = new SystemProvider(this),
-                ["quote"] = new QuoteProvider("Fuhrer.json"),
+//                ["quote"] = new QuoteProvider("Fuhrer.json"),
                 ["math"] = new MathProvider(),
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
@@ -175,7 +175,7 @@ namespace bsuir_chat_bot
             
             for (var i = 0; i < NumberOfWorkerThreads; i++)
             {
-                var worker = new Worker(this);
+                var worker = new MessageWorker(this);
                 var workerThread = new Thread(worker.Work);
                 workerThread.Start();
             }
@@ -205,10 +205,10 @@ namespace bsuir_chat_bot
                     foreach (var message in response.Messages)
                     {
                         if (message.Type == VkNet.Enums.MessageType.Sended) continue;
+                        
                         message.FromId = message.UserId;
-                        var s = message.Body.Split(" ").ToList();
                 
-                        var match = _botCommandRegex.Match(s[0]);
+                        var match = _botCommandRegex.Match(message.Body);
 
                         if (!match.Success) continue;
                 
@@ -218,7 +218,6 @@ namespace bsuir_chat_bot
                         {
                             var task = new Command(message, Functions[command].Handle);
                             Requests.Enqueue(task);
-//                        Requests.Enqueue(message);
                         }
                     }
                 }

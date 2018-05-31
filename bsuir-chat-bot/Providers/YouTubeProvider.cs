@@ -18,7 +18,7 @@ namespace bsuir_chat_bot
 {   
     public class YouTubeProvider : VkBotProvider
     {
-        private VkApi _api;
+        private readonly VkApi _api;
         
         public YouTubeProvider(VkApi api)
         {
@@ -46,7 +46,6 @@ namespace bsuir_chat_bot
                 "bestvideo[height<=720]+bestaudio",
                 "bestvideo[height<=480]+bestaudio",
                 "bestvideo[height<=360]+bestaudio"
-                
             };
             
             var getJson = Process.Start("youtube-dl",  $"--write-info-json --geo-bypass --max-filesize 2048m --skip-download -o \"../download/%(id)s/video.%(ext)s\" -f mp4 {id}");
@@ -128,21 +127,9 @@ namespace bsuir_chat_bot
         
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {
-            var (func, args) = command.ParseFunc();
+            var (_, args) = command.ParseFunc();
             
-            
-            string message;
-            Video attachement;
-
-            switch (func.ToLowerInvariant())
-            {
-                case "yt":
-                    (message, attachement) = GetVid(args[0]);
-                    break;
-                default:
-                    throw new KeyNotFoundException();
-            }
-            
+            var (message, attachement) = GetVid(args[0]);
             
             var param = new MessagesSendParams
             {
