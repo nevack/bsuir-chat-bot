@@ -66,6 +66,7 @@ namespace bsuir_chat_bot
 
             var auth = new ApiAuthParams
             {
+                TokenExpireTime = 0,
                 ApplicationId = ulong.Parse(configuration["appid"]),
                 Settings = Settings.All
             };
