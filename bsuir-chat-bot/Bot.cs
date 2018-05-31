@@ -217,7 +217,6 @@ namespace bsuir_chat_bot
                         {
                             var task = new Command(message, Functions[command].Handle);
                             Requests.Enqueue(task);
-//                        Requests.Enqueue(message);
                         }
                     }
                 }
@@ -237,7 +236,6 @@ namespace bsuir_chat_bot
             Console.WriteLine($"{configuration["login"]}");
             Console.WriteLine($"{configuration["password"]}");
             Console.WriteLine($"{configuration["accesstoken"]}");
-            // Console.WriteLine($"{configuration["shortenerapikey"]}");
         }
 
 //        private static async void QrCodeGenImage(string text, string fileName)

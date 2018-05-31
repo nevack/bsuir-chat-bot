@@ -44,11 +44,6 @@ namespace bsuir_chat_bot
             
             if (!_bot.Functions.ContainsKey(args[0])) 
                 throw new KeyNotFoundException("No such module.");
-//                return new MessagesSendParams
-//                {
-//                    Message = "No suсh module",
-//                    PeerId = command.GetPeerId()
-//                };
 
             return new MessagesSendParams
             {

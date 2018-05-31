@@ -35,7 +35,7 @@ namespace bsuir_chat_bot
             Console.WriteLine($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
             
             if (State == ProviderState.Unloaded)
-                throw new Exception($"{GetType().Name} is not loaded");
+                throw new KeyNotFoundException($"{GetType().Name} is not loaded");
 
             return _handle(command);
         }

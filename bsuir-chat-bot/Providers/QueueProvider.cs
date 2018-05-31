@@ -118,7 +118,7 @@ namespace bsuir_chat_bot
                 var i = 1;
                 foreach (var user in users)
                 {
-                    output.AppendLine($"{i++}. {user.FirstName} {user.LastName}"); //[id{user.Id}|{user.FirstName} {user.LastName}]");
+                    output.AppendLine($"{i++}. {user.FirstName} {user.LastName}");
                 }
             }
 
@@ -163,9 +163,8 @@ namespace bsuir_chat_bot
             var chatid = command.ChatId ?? throw new AccessViolationException("Available only in chats");
             var adminid = _api.Messages.GetChat(chatid).AdminId ?? 
                           throw new AccessViolationException("Only chat admin can use these method");
-//            if (!command.ChatId.HasValue) throw new AccessViolationException("Available only in chats");
-            
-            
+
+
             var (_, args) = command.ParseFunc();
 
             if (args.Length == 0 || args[0] == "load")

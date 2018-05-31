@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -100,14 +101,9 @@ namespace bsuir_chat_bot
         
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {
-            if (command.FromId.HasValue)
-            if (!_bot.Admins.Contains(command.FromId.Value))
-            {            
-                return new MessagesSendParams
-                {
-                    Message = "Permission denied",
-                    PeerId = command.GetPeerId()
-                };
+            if (command.FromId.HasValue && !_bot.Admins.Contains(command.FromId.Value))
+            {
+                throw new AccessViolationException("Permission denied!");
             }
             
             var (func, args) = command.ParseFunc();

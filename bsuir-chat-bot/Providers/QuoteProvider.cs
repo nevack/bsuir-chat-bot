@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VkNet.Model;
@@ -73,7 +74,7 @@ namespace bsuir_chat_bot
         {
             if (msg.ForwardedMessages == null)
                 return "";
-            var output = "";
+            var output = new StringBuilder();
             foreach (var message in msg.ForwardedMessages)
             {
                 if (_quotedict.Values.Any(x => x.AuthorId == message.UserId.ToString()))
@@ -90,13 +91,13 @@ namespace bsuir_chat_bot
                                 Text = message.Body
                             });
                         target.UpdateDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds();
-                        output += $"Added quote No. {target.Quotes.Count-1} by {target.AuthorName}\n";
+                        output.AppendLine($"Added quote No. {target.Quotes.Count-1} by {target.AuthorName}");
                     }
                 }
-                output += AddQuotes(message, sender);
+                output.AppendLine(AddQuotes(message, sender));
             }
 
-            return output;
+            return output.ToString();
         }
         
         protected override MessagesSendParams _handle(Message command)

@@ -109,32 +109,28 @@ namespace bsuir_chat_bot
             }
 
             var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
-            var wc = new WebClient();
-
-            try
+            using (var wc = new WebClient())
             {
-                var imageBytes = wc.DownloadData(image);
-
-                var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
-
-                var photos = _api.Photo.SaveMessagesPhoto(responseFile);
-
-                return new MessagesSendParams
+                try
                 {
-                    Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
-                    Attachments = photos,
-                    PeerId = command.GetPeerId()
-                };
-            }
-            catch (WebException)
-            {
-                return new MessagesSendParams
-                {
-                    Message = "Error getting image",
-                    PeerId = command.GetPeerId()
-                };
-            }
+                    var imageBytes = wc.DownloadData(image);
 
+                    var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
+
+                    var photos = _api.Photo.SaveMessagesPhoto(responseFile);
+
+                    return new MessagesSendParams
+                    {
+                        Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
+                        Attachments = photos,
+                        PeerId = command.GetPeerId()
+                    };
+                }
+                catch (WebException)
+                {
+                    throw new WebException("Error getting image");
+                }
+            }
         }
         
         private static async Task<string> UploadImage(string url, byte[] data)

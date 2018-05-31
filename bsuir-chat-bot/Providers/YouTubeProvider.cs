@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -38,7 +39,7 @@ namespace bsuir_chat_bot
             var match = matchLink.Match(link);
 
             if (!match.Success)
-                throw new Exception("Could not match YouTube video ID");
+                throw new AggregateException("Could not match YouTube video ID");
 
             var id = match.Groups[1].Value;
             Console.WriteLine(id);
@@ -56,6 +57,7 @@ namespace bsuir_chat_bot
             
             var r = new StreamReader($"../download/{id}/video.info.json");
             var json = r.ReadToEnd();
+            r.Dispose();
             dynamic data = JsonConvert.DeserializeObject(json);
 
             var title = $"[{id}] {data["title"]}";
@@ -99,7 +101,7 @@ namespace bsuir_chat_bot
                 
             }
             Directory.Delete($"../download/{id}", true);
-            throw new ApplicationException("Upload failed");
+            throw new WebException("Upload failed");
         }
         
         private static async Task<string> UploadVideo(string url, string filepath)
