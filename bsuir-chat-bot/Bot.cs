@@ -56,9 +56,8 @@ namespace bsuir_chat_bot
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(configFileName);
-            
-            Api = new VkApi(new NullLogger(new LogFactory()));
-            Api.RequestsPerSecond = 3;
+
+            Api = new VkApi(new NullLogger(new LogFactory())) {RequestsPerSecond = 3};
 
             var configuration = builder.Build();
             
@@ -222,10 +221,9 @@ namespace bsuir_chat_bot
                         }
                     }
                 }
-                catch (TooManyRequestsException e)
+                catch (TooManyRequestsException)
                 {
                     Thread.Sleep(500);
-                    continue;
                 }
             }
             

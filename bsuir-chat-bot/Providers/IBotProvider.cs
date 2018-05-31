@@ -40,20 +40,6 @@ namespace bsuir_chat_bot
             return _handle(command);
         }
 
-        public string GetName()
-        {
-            return GetType().Name.ToLowerInvariant().Replace("provider", "");
-        }
-        
         protected abstract MessagesSendParams _handle(VkNet.Model.Message command);
-    }
-
-    public abstract class CommandHandler
-    {
-        public string Name;
-        public string Help;
-        public VkBotProvider Provider;
-
-        public abstract MessagesSendParams Handle(string func, List<string> args);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using VkNet;
+using VkNet.Model;
 
 namespace bsuir_chat_bot
 {
@@ -21,13 +22,13 @@ namespace bsuir_chat_bot
             return message.ChatId?.ToPeerId() ?? message.FromId ?? 0;
         }
         
-        public static bool MarkAsRead(this VkNet.Model.Message message, VkApi api)
+        public static void MarkAsRead(this Message message, VkApi api)
         {
-            if (!message.Id.HasValue) return false;
-            
+            if (!message.Id.HasValue) return;
+
             var ids = new List<long> { message.Id.Value };
-            
-            return api.Messages.MarkAsRead(ids, message.GetPeerId().ToString()); 
+
+            api.Messages.MarkAsRead(ids, message.GetPeerId().ToString());
         }
         
         public static (string, string[]) ParseFunc(this VkNet.Model.Message command)
