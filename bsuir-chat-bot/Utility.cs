@@ -25,7 +25,7 @@ namespace bsuir_chat_bot
         {
             if (!message.Id.HasValue) return false;
             
-            var ids = new List<long>() { message.Id.Value };
+            var ids = new List<long> { message.Id.Value };
             
             return api.Messages.MarkAsRead(ids, message.GetPeerId().ToString()); 
         }
