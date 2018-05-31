@@ -237,14 +237,5 @@ namespace bsuir_chat_bot
             Console.WriteLine($"{configuration["password"]}");
             Console.WriteLine($"{configuration["accesstoken"]}");
         }
-
-//        private static async void QrCodeGenImage(string text, string fileName)
-//        {
-//            var qrGenerator = new QRCodeGenerator();
-//            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
-//            var qrCode = new QRCode(qrCodeData);
-//            var qrCodeImage = qrCode.GetGraphic(50);
-//            await Task.Run(() => qrCodeImage.Save(fileName));
-//        }
     }
 }
