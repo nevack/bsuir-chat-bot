@@ -22,6 +22,10 @@ namespace bsuir_chat_bot
         
         public YouTubeProvider(VkApi api)
         {
+            
+            if (!Directory.Exists("../download"))
+                Directory.CreateDirectory("../download");
+            
             _api = api;
             Functions = new Dictionary<string, string>
             {

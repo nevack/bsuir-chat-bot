@@ -27,6 +27,10 @@ namespace bsuir_chat_bot
 
         internal QueueProvider(Bot bot,VkApi api)
         {
+            
+            if (!Directory.Exists("../queues"))
+                Directory.CreateDirectory("../queues");
+            
             Functions = new Dictionary<string, string>
             {
                 {"queue", "lab queues (not stable)"},

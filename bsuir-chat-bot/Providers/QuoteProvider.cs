@@ -53,6 +53,8 @@ namespace bsuir_chat_bot
 
         private void ReloadQuotes()
         {
+            if (!Directory.Exists("../quotes"))
+                Directory.CreateDirectory("../quotes");
             _quotedict = new Dictionary<string, Author>();
             foreach (var file in Directory.GetFiles("../quotes"))
             {
@@ -136,7 +138,7 @@ namespace bsuir_chat_bot
                     message = $"Added author [{args[0]}|{args[1]}]";
                     break;
                 case "listauthors":
-                    _quotedict.ToList().ForEach(pair => message+=$"[{pair.Value.AuthorName}|id{pair.Value.AuthorId}] - {pair.Value.Quotes.Count} quotes\n");
+                    _quotedict.ToList().ForEach(pair => message+=$"[{pair.Value.AuthorName}|id{pair.Value.AuthorId}] - {pair.Value.Quotes.Count}");
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
