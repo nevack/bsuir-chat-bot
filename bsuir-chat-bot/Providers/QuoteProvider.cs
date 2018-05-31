@@ -111,7 +111,11 @@ namespace bsuir_chat_bot
                 case "addquote":
                     if (command.UserId != null) message = AddQuotes(command, command.UserId.Value);
                     if (message == "") message = "No new quotes added";
-                    SaveQuotes();
+                    else
+                    {
+                        SaveQuotes();
+                        ReloadQuotes();
+                    }
                     break;
                 default:
                     throw new ArgumentException("No matching command found");
