@@ -39,7 +39,7 @@ namespace bsuir_chat_bot
 
         private string JoinQueue(long id, long who, string which)
         {
-            var filename = $"queues\\{id}.json";
+            var filename = $"../queues/{id}.json";
 
             var exists = File.Exists(filename);
 
@@ -66,7 +66,7 @@ namespace bsuir_chat_bot
         
         private string LeaveQueue(long id, long who, string which)
         {
-            var filename = $"queues\\{id}.json";
+            var filename = $"../queues/{id}.json";
 
             var exists = File.Exists(filename);
 
@@ -93,7 +93,7 @@ namespace bsuir_chat_bot
 
         private string LoadQueue(long id)
         {
-            var name = $"queues\\{id}.json";
+            var name = $"../queues/{id}.json";
 
             var exists = File.Exists(name);
 
@@ -123,7 +123,7 @@ namespace bsuir_chat_bot
 
         private string AddQueue(long id, string name, long creator)
         {
-            var filename = $"queues\\{id}.json";
+            var filename = $"../queues/{id}.json";
 
             var exists = File.Exists(filename);
 

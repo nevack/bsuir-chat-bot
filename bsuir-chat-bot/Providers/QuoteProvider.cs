@@ -53,7 +53,7 @@ namespace bsuir_chat_bot
         private void ReloadQuotes()
         {
             _quotedict = new Dictionary<string, Author>();
-            foreach (var file in Directory.GetFiles("Quote Library"))
+            foreach (var file in Directory.GetFiles("../quotes"))
             {
                 var json = File.ReadAllText(file);
                 var a = JObject.Parse(json).ToObject<Author>();
@@ -64,7 +64,7 @@ namespace bsuir_chat_bot
         private void SaveQuotes()
         {
             foreach (var author in _quotedict.Values)
-                File.WriteAllText(author.AuthorName+".json", JsonConvert.SerializeObject(author));
+                File.WriteAllText($"../quotes/{author.AuthorName}.json", JsonConvert.SerializeObject(author));
         }
 
         private string AddQuotes(Message msg, long sender)
