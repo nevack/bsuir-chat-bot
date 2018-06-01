@@ -56,7 +56,7 @@ namespace bsuir_chat_bot
                 DateTime.Parse(lesson["startLessonTime"].Value) < DateTime.Now &&
                 DateTime.Parse(lesson["endLessonTime"].Value) > DateTime.Now);
             var output = $"Right now group {groupId} is supposed to be at:\n";
-            return currentLesson.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
+            return !currentLesson.Any() ? $"Group {groupId} is free right now!" : currentLesson.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
         }
 
         /// <summary>
