@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using VkNet;
 using VkNet.Enums;
 using VkNet.Enums.SafetyEnums;
 using VkNet.Model;
@@ -12,14 +11,15 @@ namespace bsuir_chat_bot
 {   
     public class StatsProvider : VkBotProvider
     {
-        private readonly VkApi _api;
-        
-        public StatsProvider(VkApi api)
+        private readonly Bot _bot;
+
+        internal StatsProvider(Bot bot)
         {
-            _api = api;
+            _bot = bot;
             Functions = new Dictionary<string, string>
             {
-                {"rank", "rank [words, chars, messages] - top ten users in this chat ranked by count"}
+                {"rank", "rank [words, chars, messages] - top ten users in this chat ranked by count"},
+                {"uptime", "uptime - get bot time running"}
             };
         }
 
@@ -31,7 +31,7 @@ namespace bsuir_chat_bot
             
             while (true)
             {
-                var messages = _api.Messages.GetHistory(new MessagesGetHistoryParams
+                var messages = _bot.Api.Messages.GetHistory(new MessagesGetHistoryParams
                 {
                     Offset = offset, 
                     Count = 200, 
@@ -84,7 +84,7 @@ namespace bsuir_chat_bot
             
             var output = new StringBuilder();
 
-            var users = _api.Users.Get(result.Keys);
+            var users = _bot.Api.Users.Get(result.Keys);
 
             var i = 0;
             foreach (var item in result)
@@ -100,7 +100,14 @@ namespace bsuir_chat_bot
 
         protected override MessagesSendParams _handle(Message command)
         {
-            var (_, args) = command.ParseFunc();
+            var (func, args) = command.ParseFunc();
+
+            if (func.ToLowerInvariant() == "uptime")
+                return new MessagesSendParams
+                {
+                    Message = _bot.GetUptime(),
+                    PeerId = command.GetPeerId()
+                };
 
             var argcount = args.Length;
 

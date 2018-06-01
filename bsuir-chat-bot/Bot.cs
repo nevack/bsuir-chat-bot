@@ -110,7 +110,7 @@ namespace bsuir_chat_bot
                 ["help"] = new HelpProvider(this),
                 ["queue"] = new QueueProvider(this, Api),
                 ["youtube"] = new YouTubeProvider(Api),
-                ["stats"] = new StatsProvider(Api)
+                ["stats"] = new StatsProvider(this)
             };
 
             foreach (var provider in Providers)

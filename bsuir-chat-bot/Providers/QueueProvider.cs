@@ -25,7 +25,7 @@ namespace bsuir_chat_bot
         private readonly Bot _bot;
         private readonly VkApi _api;
 
-        internal QueueProvider(Bot bot,VkApi api)
+        internal QueueProvider(Bot bot, VkApi api)
         {
             
             if (!Directory.Exists("../queues"))

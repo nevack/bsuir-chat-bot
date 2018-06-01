@@ -27,9 +27,6 @@ namespace bsuir_chat_bot
                     "wakeup", "wakeup - it's september"
                 },
                 {
-                    "uptime", "uptime - get bot time running"
-                },
-                {
                     "load", "load - load a module"
                 },
                 {
@@ -125,10 +122,6 @@ namespace bsuir_chat_bot
                 case "stop":
                     Stop();
                     message = "Bye";
-                    break;
-                
-                case "uptime":
-                    message = GetUptime();
                     break;
                 
                 case "load":
