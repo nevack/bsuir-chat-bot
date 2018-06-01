@@ -12,7 +12,6 @@ using VkNet.Enums.Filters;
 using NLog;
 using Serilog;
 using VkNet.Exception;
-using VkNet.Model;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -240,7 +239,7 @@ namespace bsuir_chat_bot
             {
                 try
                 {
-                    var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null).Result;	
+                    _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null).Wait();	
                 
                     var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                         Pts = longPool.Pts, Ts = longPool.Ts
