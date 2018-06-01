@@ -151,8 +151,8 @@ namespace bsuir_chat_bot
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
                 ["queue"] = new QueueProvider(this, Api),
-                ["yt"] = new YouTubeProvider(Api),
-                ["stats"] = new StatsProvider(Api),
+                ["youtube"] = new YouTubeProvider(Api),
+                ["stats"] = new StatsProvider(this),
                 ["bsuir"] = new BsuirProvider()
             };
 
@@ -240,8 +240,7 @@ namespace bsuir_chat_bot
             {
                 try
                 {
-                    var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null);	
-                    r.Wait();
+                    var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null).Result;	
                 
                     var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
                         Pts = longPool.Pts, Ts = longPool.Ts
