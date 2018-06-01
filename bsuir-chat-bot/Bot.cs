@@ -11,6 +11,7 @@ using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
 using VkNet.Exception;
+using VkNet.Model;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -107,7 +108,7 @@ namespace bsuir_chat_bot
                 ["flipcoin"] = new FlipcoinProvider(),
                 ["help"] = new HelpProvider(this),
                 ["queue"] = new QueueProvider(this, Api),
-                ["yt"] = new YouTubeProvider(Api),
+                ["youtube"] = new YouTubeProvider(Api),
                 ["stats"] = new StatsProvider(Api)
             };
 
