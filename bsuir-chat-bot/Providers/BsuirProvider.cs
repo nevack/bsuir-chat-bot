@@ -117,13 +117,14 @@ namespace bsuir_chat_bot
         
         private static string LessonToString(dynamic lesson)
         {
-            var output = $"▻︎ {lesson["lessonTime"]}: {(lesson["numSubgroup"] == 0 ? "" : "Подгруппа " + lesson["numSubgroup"].ToString() + " ")} {lesson["lessonType"]} {lesson["subject"]} {lesson["note"]}";
+            var output = new StringBuilder();
+            output.Append($"▻︎ {lesson["lessonTime"]}: {(lesson["numSubgroup"] == 0 ? "" : "Подгруппа " + lesson["numSubgroup"].ToString() + " ")} {lesson["lessonType"]} {lesson["subject"]} {lesson["note"]}");
             foreach (var employee in lesson["employee"])
-                output += $", {employee["fio"]}";
+                output.Append($", {employee["fio"]}");
             foreach (var auditory in lesson["auditory"])
-                output += $", {auditory}";
-            output += "\n";
-            return output;
+                output.Append($", {auditory}");
+            output.Append("\n");
+            return output.ToString();
         }
 
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
