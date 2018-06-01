@@ -10,7 +10,7 @@ namespace bsuir_chat_bot
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
-                .WriteTo.Console(theme: SystemConsoleTheme.Colored)
+                .WriteTo.Console(theme: SystemConsoleTheme.Grayscale)
                 .WriteTo.File(@"../logs/log.txt",
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
