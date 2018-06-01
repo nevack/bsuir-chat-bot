@@ -259,12 +259,10 @@ namespace bsuir_chat_bot
                         if (!match.Success) continue;
                 
                         var command = match.Groups[1].Value.ToLower();
-                   
-                        if (Functions.ContainsKey(command))
-                        {
-                            var task = new Command(message, Functions[command].Handle);
-                            Requests.Enqueue(task);
-                        }
+
+                        if (!Functions.ContainsKey(command)) continue;
+                        var task = new Command(message, Functions[command].Handle);
+                        Requests.Enqueue(task);
                     }
                 }
                 catch (TooManyRequestsException)
