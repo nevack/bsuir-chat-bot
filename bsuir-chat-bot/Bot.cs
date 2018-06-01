@@ -271,9 +271,9 @@ namespace bsuir_chat_bot
                 {
                     Thread.Sleep(500);
                 }
-                catch (TimeoutException)
+                catch (PublicServerErrorException)
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(10000);
                 }
             }
         }
