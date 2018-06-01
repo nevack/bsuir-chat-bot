@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Serilog;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -32,7 +33,7 @@ namespace bsuir_chat_bot
 
         public MessagesSendParams Handle(VkNet.Model.Message command)
         {
-            Console.WriteLine($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {GetType().Name.PadLeft(20)} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
+            Log.Information($"[ {GetType().Name} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
             
             if (State == ProviderState.Unloaded)
                 throw new KeyNotFoundException($"{GetType().Name} is not loaded");

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
+using Serilog;
 using VkNet.Exception;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
@@ -85,12 +86,12 @@ namespace bsuir_chat_bot
 
             if (!Api.IsAuthorized)
             {
-                Console.WriteLine("Failed to log in with credentials: ");
+                Log.Error("Failed to log in with credentials: ");
                 PrintCredentials(configuration);
                 return;
             }
 
-            Console.WriteLine($"Started with token:\n{Api.Token}\n");
+            Log.Information($"Token: {Api.Token}");
             
             _botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
@@ -185,6 +186,8 @@ namespace bsuir_chat_bot
             var pollerThread = new Thread(StartLongPolling);
             pollerThread.Start();
             senderThread.Start();
+
+            pollerThread.Join();
         }
 
         private void StartLongPolling()
@@ -226,8 +229,6 @@ namespace bsuir_chat_bot
                     Thread.Sleep(500);
                 }
             }
-            
-            Console.WriteLine("System Halt! Bye.");
         }
         
 
