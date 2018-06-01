@@ -431,4 +431,4 @@ bsuir-chat-bot/queues/
 /download
 /queues
 /quotes
-/logs
+/logs/*
