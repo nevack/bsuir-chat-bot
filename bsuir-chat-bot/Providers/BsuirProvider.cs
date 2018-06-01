@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VkNet;
-using VkNet.Model.Attachments;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -56,7 +49,7 @@ namespace bsuir_chat_bot
                 DateTime.Parse(lesson["startLessonTime"].Value) < DateTime.Now &&
                 DateTime.Parse(lesson["endLessonTime"].Value) > DateTime.Now);
             var output = $"Right now group {groupId} is supposed to be at:\n";
-            return !currentLesson.Any() ? $"Group {groupId} is free right now!" : currentLesson.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
+            return currentLesson.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
         }
 
         /// <summary>
@@ -68,7 +61,7 @@ namespace bsuir_chat_bot
         {
             dynamic data = JsonConvert.DeserializeObject(GetSchedule(groupId));
             IEnumerable<dynamic> todaySchedule = data["todaySchedules"];
-            if (!todaySchedule.Any())
+            if (todaySchedule == null)
                 return $"Group {groupId} is free today!";
             var output = $"Today's schedule for group {groupId} is:\n";
             return todaySchedule.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
@@ -83,7 +76,7 @@ namespace bsuir_chat_bot
         {
             dynamic data = JsonConvert.DeserializeObject(GetSchedule(groupId));
             IEnumerable<dynamic> tomorrowSchedule = data["tomorrowSchedules"];
-            if (!tomorrowSchedule.Any())
+            if (tomorrowSchedule == null)
                 return $"Group {groupId} is free tomorrow!";
             var output = $"Tomorrow's schedule for group {groupId} is:\n";
             return tomorrowSchedule.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));

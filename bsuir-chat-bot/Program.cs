@@ -1,4 +1,6 @@
-﻿using Serilog;
+﻿using NLog;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace bsuir_chat_bot
 {
@@ -8,7 +10,7 @@ namespace bsuir_chat_bot
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
-                .WriteTo.Console()
+                .WriteTo.Console(theme: SystemConsoleTheme.Colored)
                 .WriteTo.File(@"..\logs\log.txt",
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
@@ -20,6 +22,7 @@ namespace bsuir_chat_bot
             bot.Start();
             
             Log.Information("System Halt! Bye.");
+            Log.CloseAndFlush();
         }
     }
 }

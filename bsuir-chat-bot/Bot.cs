@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
@@ -235,28 +237,29 @@ namespace bsuir_chat_bot
 
         private void StartLongPolling()
         {
-            var longPool = Api.Messages.GetLongPollServer(true);
+            var longPoll = Api.Messages.GetLongPollServer(true);
             while (BotState != State.Stoped)
             {
                 try
                 {
-                    var r = _client.PostAsync($"https://{longPool.Server}?act=a_check&key={longPool.Key}&ts={longPool.Pts}&wait=25&mode=2&version=2", null).Result;	
+                    var r = _client.PostAsync($"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Pts}&wait=25&mode=2&version=2", null).Result;	
                 
                     var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
-                        Pts = longPool.Pts, Ts = longPool.Ts
+                        Pts = longPoll.Pts, Ts = longPoll.Ts
                     });
-                    longPool.Pts = response.NewPts;
-                    
+                    longPoll.Pts = response.NewPts;
+
+
                     foreach (var message in response.Messages)
                     {
                         if (message.Type == VkNet.Enums.MessageType.Sended) continue;
                         message.FromId = message.UserId;
                         var s = message.Body.Split(" ").ToList();
-                
+
                         var match = _botCommandRegex.Match(s[0]);
 
                         if (!match.Success) continue;
-                
+
                         var command = match.Groups[1].Value.ToLower();
 
                         if (!Functions.ContainsKey(command)) continue;
@@ -264,9 +267,12 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (Exception e)
+                catch (TooManyRequestsException)
                 {
-                    Log.Warning(e, "{Now} exception!", DateTime.Now);
+                    Thread.Sleep(500);
+                }
+                catch (TimeoutException)
+                {
                     Thread.Sleep(500);
                 }
             }
