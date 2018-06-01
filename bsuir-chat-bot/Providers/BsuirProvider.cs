@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,9 +20,7 @@ namespace bsuir_chat_bot
     public class BsuirProvider : VkBotProvider
     {   
         private const string BsuirApiLink =  "https://students.bsuir.by/api/v1/studentGroup/schedule";
-        
-        private readonly HttpClient _client = new HttpClient();
-        
+
         public BsuirProvider()
         {
             Functions = new Dictionary<string, string>
@@ -37,11 +34,13 @@ namespace bsuir_chat_bot
         /// </summary>
         /// <param name="groupId">Target group number</param>
         /// <returns>A string with the schedule</returns>
-        private string GetSchedule(string groupId)
+        private static string GetSchedule(string groupId)
         {
-            var webClient = new WebClient();
-            webClient.QueryString.Add("studentGroup", groupId);
-            return webClient.DownloadString(BsuirApiLink);
+            using (var webClient = new WebClient())
+            {   
+                webClient.QueryString.Add("studentGroup", groupId);
+                return webClient.DownloadString(BsuirApiLink);
+            }
         }
 
         /// <summary>
@@ -104,7 +103,7 @@ namespace bsuir_chat_bot
                 {
                     JArray weekNumber = lesson["weekNumber"];
                     var currentWeek = data["currentWeekNumber"];
-                    if (weekNumber.Count(kek => kek == currentWeek) == 0)
+                    if (weekNumber.All(kek => kek != currentWeek))
                         continue;
                     output += LessonToString(lesson);
                     freeDay = false;
@@ -118,9 +117,7 @@ namespace bsuir_chat_bot
         
         private static string LessonToString(dynamic lesson)
         {
-            var output = "";
-            output +=
-                $"▻︎ {lesson["lessonTime"]}: {(lesson["numSubgroup"] == 0 ? "" : "Подгруппа " + lesson["numSubgroup"].ToString() + " ")} {lesson["lessonType"]} {lesson["subject"]} {lesson["note"]}";
+            var output = $"▻︎ {lesson["lessonTime"]}: {(lesson["numSubgroup"] == 0 ? "" : "Подгруппа " + lesson["numSubgroup"].ToString() + " ")} {lesson["lessonType"]} {lesson["subject"]} {lesson["note"]}";
             foreach (var employee in lesson["employee"])
                 output += $", {employee["fio"]}";
             foreach (var auditory in lesson["auditory"])
@@ -153,7 +150,7 @@ namespace bsuir_chat_bot
                     message = Week(args[1]);
                     break;
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException("Second argument is incorrect");
             }
             
             var param = new MessagesSendParams
