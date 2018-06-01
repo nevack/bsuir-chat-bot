@@ -48,6 +48,8 @@ namespace bsuir_chat_bot
             var currentLesson = todaySchedule.Where(lesson =>
                 DateTime.Parse(lesson["startLessonTime"].Value) < DateTime.Now &&
                 DateTime.Parse(lesson["endLessonTime"].Value) > DateTime.Now);
+            if (!currentLesson.Any())
+                return $"Group {groupId} is free right now!";
             var output = $"Right now group {groupId} is supposed to be at:\n";
             return currentLesson.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
         }
@@ -61,7 +63,7 @@ namespace bsuir_chat_bot
         {
             dynamic data = JsonConvert.DeserializeObject(GetSchedule(groupId));
             IEnumerable<dynamic> todaySchedule = data["todaySchedules"];
-            if (todaySchedule == null)
+            if (!todaySchedule.Any())
                 return $"Group {groupId} is free today!";
             var output = $"Today's schedule for group {groupId} is:\n";
             return todaySchedule.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
@@ -76,7 +78,7 @@ namespace bsuir_chat_bot
         {
             dynamic data = JsonConvert.DeserializeObject(GetSchedule(groupId));
             IEnumerable<dynamic> tomorrowSchedule = data["tomorrowSchedules"];
-            if (tomorrowSchedule == null)
+            if (!tomorrowSchedule.Any())
                 return $"Group {groupId} is free tomorrow!";
             var output = $"Tomorrow's schedule for group {groupId} is:\n";
             return tomorrowSchedule.Aggregate(output, (current, lesson) => (string) (current + LessonToString(lesson)));
