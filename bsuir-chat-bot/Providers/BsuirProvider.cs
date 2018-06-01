@@ -94,7 +94,7 @@ namespace bsuir_chat_bot
             dynamic data = JsonConvert.DeserializeObject(GetSchedule(groupId));
             if (data["schedules"] == null)
                 return $"Group {groupId} is free this week!";
-            var output = $"This week's schedule for group {groupId} is:\n";
+            var output = new StringBuilder($"This week's schedule for group {groupId} is:\n");
             foreach (var day in data["schedules"])
             {
                 output += "\n"+day["weekDay"] + ":\n";
@@ -109,10 +109,10 @@ namespace bsuir_chat_bot
                     freeDay = false;
                 }
 
-                if (freeDay) output += "This day is free this week!\n";
+                if (freeDay) output.Append("This day is free this week!\n");
             }
 
-            return output;
+            return output.ToString();
         }
         
         private static string LessonToString(dynamic lesson)
