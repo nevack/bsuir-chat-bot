@@ -39,7 +39,7 @@ namespace bsuir_chat_bot
             
             try
             {
-                sub = _reddit.GetSubreddit(args[0]);
+                sub = _reddit.GetSubredditAsync(args[0]).Result;
             }
             catch (WebException)
             {
@@ -61,29 +61,22 @@ namespace bsuir_chat_bot
             
             Listing<Post> listing;
             
-            if (args.Length > 1)
+            switch (args.Last().ToLowerInvariant())
             {
-                switch (args[1].ToLowerInvariant())
-                {
-                    case "top":
-                        listing = sub.GetTop(FromTime.Day);
-                        break;
+                case "top":
+                    listing = sub.GetTop(FromTime.Day);
+                    break;
 
-                    default: // "hot" also
-                        listing = sub.Hot;
-                        break;
+                default: // "hot" also
+                    listing = sub.GetPosts(Subreddit.Sort.Hot);
+                    break;
                     
-                    case "new":
-                        listing = sub.New;
-                        break;
-                }
-            }
-            else
-            {
-                listing = sub.Hot;
+                case "new":
+                    listing = sub.GetPosts(Subreddit.Sort.New);
+                    break;
             }
 
-            var posts = listing.Take(50).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList();
+            var posts = listing.Take(50).Where(p => p.Url.ToString().EndsWith(".jpg")).ToList().Result;
 
             var rand = new Random();
 
@@ -109,32 +102,28 @@ namespace bsuir_chat_bot
             }
 
             var server = _api.Photo.GetMessagesUploadServer(command.GetPeerId());
-            var wc = new WebClient();
-
-            try
+            using (var wc = new WebClient())
             {
-                var imageBytes = wc.DownloadData(image);
-
-                var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
-
-                var photos = _api.Photo.SaveMessagesPhoto(responseFile);
-
-                return new MessagesSendParams
+                try
                 {
-                    Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
-                    Attachments = photos,
-                    PeerId = command.GetPeerId()
-                };
-            }
-            catch (WebException)
-            {
-                return new MessagesSendParams
-                {
-                    Message = "Error getting image",
-                    PeerId = command.GetPeerId()
-                };
-            }
+                    var imageBytes = wc.DownloadData(image);
 
+                    var responseFile = UploadImage(server.UploadUrl, imageBytes).Result;
+
+                    var photos = _api.Photo.SaveMessagesPhoto(responseFile);
+
+                    return new MessagesSendParams
+                    {
+                        Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
+                        Attachments = photos,
+                        PeerId = command.GetPeerId()
+                    };
+                }
+                catch (WebException)
+                {
+                    throw new WebException("Error getting image");
+                }
+            }
         }
         
         private static async Task<string> UploadImage(string url, byte[] data)

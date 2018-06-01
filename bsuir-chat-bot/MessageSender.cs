@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Serilog;
 using VkNet.Exception;
 
 namespace bsuir_chat_bot
@@ -8,7 +9,6 @@ namespace bsuir_chat_bot
     {
         private const int ChecksPerSecond = 100;
         private readonly Bot _bot;
-        private int _millisecondsTimeout;
 
         internal MessageSender(Bot bot)
         {
@@ -17,7 +17,7 @@ namespace bsuir_chat_bot
 
         public void Work()
         {
-            _millisecondsTimeout = 0;
+            var timeout = 200;
 
             while (_bot.BotState != Bot.State.Stoped)
             {
@@ -27,24 +27,25 @@ namespace bsuir_chat_bot
                     {
                         _bot.Api.Messages.Send(messageSend);
 
-                        if (_millisecondsTimeout > 200) _millisecondsTimeout /= 2;
+                        if (timeout > 200) timeout /= 2;
                     }
-                    catch (CaptchaNeededException)
+                    catch (CaptchaNeededException e)
                     {    
+                        Log.Error(e, "Sleeping a minute");
                         Thread.Sleep(60 /*seconds*/ * 1000);
                         _bot.Responses.Enqueue(messageSend);
                     }
                     catch (Exception e)
                     {
-                        _millisecondsTimeout *= _millisecondsTimeout < 6_400 
+                        timeout *= timeout < 6_400 
                             ? 2 
                             : throw e;
                         _bot.Responses.Enqueue(messageSend);
                     }
 
-                    Console.WriteLine(
-                        $"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ {"Bot message sender".PadLeft(20)} ]: Sent response '{messageSend.Message.Replace(Environment.NewLine, "").Truncate(32)}'");
-                    Thread.Sleep(_millisecondsTimeout);
+                    Log.Debug($"{DateTime.Now:hh\\:mm\\:ss\\.fff} [ Message sender ]: Sent response " +
+                              $"'{messageSend.Message.Replace(Environment.NewLine, "").Truncate(32)}'");
+                    Thread.Sleep(timeout);
                 }
                 else
                     Thread.Sleep(1000 / ChecksPerSecond);

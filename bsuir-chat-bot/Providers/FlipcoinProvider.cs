@@ -20,7 +20,7 @@ namespace bsuir_chat_bot
 
         protected override MessagesSendParams _handle(VkNet.Model.Message command)
         {            
-            return new MessagesSendParams()
+            return new MessagesSendParams
             {
                 Message = Coins[Random.Next() % 2],
                 PeerId = command.GetPeerId()

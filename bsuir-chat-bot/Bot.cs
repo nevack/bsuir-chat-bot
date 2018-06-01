@@ -10,7 +10,9 @@ using Microsoft.Extensions.Configuration;
 using VkNet;
 using VkNet.Enums.Filters;
 using NLog;
+using Serilog;
 using VkNet.Exception;
+using VkNet.Model;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
@@ -126,12 +128,12 @@ namespace bsuir_chat_bot
 
             if (!Api.IsAuthorized)
             {
-                Console.WriteLine("Failed to log in with credentials: ");
+                Log.Error("Failed to log in with credentials: ");
                 PrintCredentials(configuration);
                 return;
             }
 
-            Console.WriteLine($"Started with token:\n{Api.Token}\n");
+            Log.Information($"Token: {Api.Token}");
             
             _botCommandRegex = new Regex(@"^[\/\\\!](\w+)");
 
@@ -227,6 +229,8 @@ namespace bsuir_chat_bot
             var pollerThread = new Thread(StartLongPolling);
             pollerThread.Start();
             senderThread.Start();
+
+            pollerThread.Join();
         }
 
         private void StartLongPolling()
@@ -260,18 +264,14 @@ namespace bsuir_chat_bot
                         {
                             var task = new Command(message, Functions[command].Handle);
                             Requests.Enqueue(task);
-//                        Requests.Enqueue(message);
                         }
                     }
                 }
-                catch (TooManyRequestsException e)
+                catch (TooManyRequestsException)
                 {
                     Thread.Sleep(500);
-                    continue;
                 }
             }
-            
-            Console.WriteLine("System Halt! Bye.");
         }
         
 
@@ -281,16 +281,6 @@ namespace bsuir_chat_bot
             Console.WriteLine($"{configuration["login"]}");
             Console.WriteLine($"{configuration["password"]}");
             Console.WriteLine($"{configuration["accesstoken"]}");
-            // Console.WriteLine($"{configuration["shortenerapikey"]}");
         }
-
-//        private static async void QrCodeGenImage(string text, string fileName)
-//        {
-//            var qrGenerator = new QRCodeGenerator();
-//            var qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
-//            var qrCode = new QRCode(qrCodeData);
-//            var qrCodeImage = qrCode.GetGraphic(50);
-//            await Task.Run(() => qrCodeImage.Save(fileName));
-//        }
     }
 }

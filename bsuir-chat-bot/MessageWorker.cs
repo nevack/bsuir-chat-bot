@@ -26,7 +26,7 @@ namespace bsuir_chat_bot
                     }
                     catch (Exception e)
                     {
-                        _bot.Responses.Enqueue(new MessagesSendParams()
+                        _bot.Responses.Enqueue(new MessagesSendParams
                         {
                             PeerId = task.Message.GetPeerId(),
                             Message = e.Message

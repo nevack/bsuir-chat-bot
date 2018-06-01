@@ -19,7 +19,7 @@ namespace bsuir_chat_bot
             _api = api;
             Functions = new Dictionary<string, string>
             {
-                {"rank", "rank [words, chars, messages] - top ten users in this chat ranked by count"},
+                {"rank", "rank [words, chars, messages] - top ten users in this chat ranked by count"}
             };
         }
 
@@ -49,7 +49,7 @@ namespace bsuir_chat_bot
                         return (message.Date.Value, output);
                     }
 
-                    if (message.Type == MessageType.Received && message.Action == null)
+                    if (message.Type == MessageType.Received && message.Action != null)
                         output.Add(message);
                 }
             }
@@ -120,7 +120,7 @@ namespace bsuir_chat_bot
             var (when, top) = GetHistory(command.GetPeerId(), fromDate);
 
             var message = $"Top 10 users in this chat ranked by {entity} " +
-                          $"count from {when:dd.MM.yyyy HH:mm:ss}";
+                          $"count from {when:dd.MM.yyyy HH:mm:ss}\n";
             
             switch (entity.ToLowerInvariant())
             {

@@ -118,7 +118,7 @@ namespace bsuir_chat_bot
                 var i = 1;
                 foreach (var user in users)
                 {
-                    output.AppendLine($"{i++}. {user.FirstName} {user.LastName}"); //[id{user.Id}|{user.FirstName} {user.LastName}]");
+                    output.AppendLine($"{i++}. {user.FirstName} {user.LastName}");
                 }
             }
 
@@ -131,7 +131,7 @@ namespace bsuir_chat_bot
 
             var exists = File.Exists(filename);
 
-            var lab = new LabQueue()
+            var lab = new LabQueue
             {
                 Creation = DateTime.Now.Ticks,
                 Creator = creator,
@@ -150,7 +150,7 @@ namespace bsuir_chat_bot
             }
             else
             {
-                labs = new List<LabQueue>() { lab };
+                labs = new List<LabQueue> { lab };
             }
                 
             File.WriteAllText(filename, JsonConvert.SerializeObject(labs));
@@ -163,14 +163,13 @@ namespace bsuir_chat_bot
             var chatid = command.ChatId ?? throw new AccessViolationException("Available only in chats");
             var adminid = _api.Messages.GetChat(chatid).AdminId ?? 
                           throw new AccessViolationException("Only chat admin can use these method");
-//            if (!command.ChatId.HasValue) throw new AccessViolationException("Available only in chats");
-            
-            
+
+
             var (_, args) = command.ParseFunc();
 
             if (args.Length == 0 || args[0] == "load")
             {
-                return new MessagesSendParams()
+                return new MessagesSendParams
                 {
                     PeerId = command.GetPeerId(),
                     Message = LoadQueue(chatid)
@@ -182,35 +181,32 @@ namespace bsuir_chat_bot
                 if (command.FromId != adminid && !_bot.Admins.Contains(command.FromId ?? 0)) 
                     throw new AccessViolationException("Only chat admin can use these method");
                 
-                return new MessagesSendParams()
+                return new MessagesSendParams
                 {
                     PeerId = command.GetPeerId(),
                     Message = AddQueue(chatid, string.Join(' ', args.Skip(1)), adminid)
                 };
             }
+
+            string message;
             
-            if (args[0] == "join")
+            switch (args[0])
             {
-                return new MessagesSendParams()
-                {
-                    PeerId = command.GetPeerId(),
-                    Message = JoinQueue(chatid, command.FromId ?? 0, "last")
-                };
+                case "join":
+                    message = JoinQueue(chatid, command.FromId ?? 0, "last");
+                    break;
+                case "leave":
+                    message = LeaveQueue(chatid, command.FromId ?? 0, "last");
+                    break;
+                default:
+                    message = "Error!";
+                    break;
             }
-            
-            if (args[0] == "leave")
-            {
-                return new MessagesSendParams()
-                {
-                    PeerId = command.GetPeerId(),
-                    Message = LeaveQueue(chatid, command.FromId ?? 0, "last")
-                };
-            }
-            
-            return new MessagesSendParams()
+
+            return new MessagesSendParams
             {
                 PeerId = command.GetPeerId(),
-                Message = "sosi"
+                Message = message
             };
         }
     }

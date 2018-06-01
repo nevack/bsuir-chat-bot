@@ -9,7 +9,7 @@ namespace bsuir_chat_bot
 { 
     public class MathProvider: VkBotProvider
     {
-        private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>()
+        private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>
         {
             ["Pi"] = Math.PI,
             ["pi"] = Math.PI,
@@ -83,7 +83,7 @@ namespace bsuir_chat_bot
                 message += e.Message;
             }
             
-            return new MessagesSendParams()
+            return new MessagesSendParams
             {
                 PeerId = command.GetPeerId(),
                 Message =  message
