@@ -265,8 +265,9 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (TooManyRequestsException)
+                catch (Exception e)
                 {
+                    Log.Warning(e, "{Now} exception!", DateTime.Now);
                     Thread.Sleep(500);
                 }
             }
