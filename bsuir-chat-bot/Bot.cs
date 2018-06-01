@@ -17,8 +17,14 @@ using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
 {      
+    /// <summary>
+    /// Class that controls Providers and message I/O
+    /// </summary>
     internal class Bot
     {
+        /// <summary>
+        /// Bot state
+        /// </summary>
         internal enum State
         {
             Running,
@@ -26,30 +32,65 @@ namespace bsuir_chat_bot
             Stoped
         }
         
+        /// <summary>
+        /// Number of threads processing commands
+        /// </summary>
+        /// <value>Positive integer</value>
         private const int NumberOfWorkerThreads = 4;
 
+        /// <summary>
+        /// Admins with rights to control bot service functions like
+        /// /stop
+        /// </summary>
         public long[] Admins { get; }
         
         public State BotState { get; set; } = State.Stoped;
         
         private readonly HttpClient _client = new HttpClient();
         
+        /// <summary>
+        /// A regular expression for filtering commands from normal messages
+        /// </summary>
         private readonly Regex _botCommandRegex;
+        
         private readonly DateTime _startTime;
         
+        /// <summary>
+        /// A dictionary for associating provider name and provider class 
+        /// </summary>
         public Dictionary<string, VkBotProvider> Providers { get; }
+        
+        /// <summary>
+        /// A dictionary for associating functions with the respective provider class
+        /// </summary>
         public Dictionary<string, VkBotProvider> Functions { get; }
         
+        /// <summary>
+        /// The main API that interacts with VK
+        /// </summary>
         public VkApi Api { get; }
+        
+        /// <summary>
+        /// Injest queue that stores messages to be processed by worker threads
+        /// </summary>
         public ConcurrentQueue<Command> Requests { get; }
+        
+        /// <summary>
+        /// Output queue that stores messages to be sent out
+        /// </summary>
         public ConcurrentQueue<MessagesSendParams> Responses { get; }
 
         public string GetUptime() => (DateTime.Now - _startTime).ToString(@"d\.hh\:mm\:ss");
 
+        /// <summary>
+        /// Configure a new instance of the Bot
+        /// </summary>
+        /// <param name="configFileName">Path to a .json file with configuration</param>
+        /// <exception cref="FileNotFoundException">Selected file is not available</exception>
         public Bot(string configFileName)
         {
             _startTime = DateTime.Now;
-
+            
             if (!File.Exists(configFileName))
             {
                 throw new FileNotFoundException("Can't find config file", configFileName);
@@ -59,6 +100,7 @@ namespace bsuir_chat_bot
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(configFileName);
 
+            // Initialize a new VkApi based on selected config
             Api = new VkApi(new NullLogger(new LogFactory())) {RequestsPerSecond = 3};
 
             var configuration = builder.Build();
@@ -110,7 +152,8 @@ namespace bsuir_chat_bot
                 ["help"] = new HelpProvider(this),
                 ["queue"] = new QueueProvider(this, Api),
                 ["youtube"] = new YouTubeProvider(Api),
-                ["stats"] = new StatsProvider(this)
+                ["stats"] = new StatsProvider(this),
+                ["bsuir"] = new BsuirProvider()
             };
 
             foreach (var provider in Providers)
@@ -216,12 +259,10 @@ namespace bsuir_chat_bot
                         if (!match.Success) continue;
                 
                         var command = match.Groups[1].Value.ToLower();
-                   
-                        if (Functions.ContainsKey(command))
-                        {
-                            var task = new Command(message, Functions[command].Handle);
-                            Requests.Enqueue(task);
-                        }
+
+                        if (!Functions.ContainsKey(command)) continue;
+                        var task = new Command(message, Functions[command].Handle);
+                        Requests.Enqueue(task);
                     }
                 }
                 catch (TooManyRequestsException)

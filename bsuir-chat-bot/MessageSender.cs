@@ -5,6 +5,9 @@ using VkNet.Exception;
 
 namespace bsuir_chat_bot
 {
+    /// <summary>
+    /// Singleton class sending out messages
+    /// </summary>
     public class MessageSender
     {
         private const int ChecksPerSecond = 100;
@@ -15,6 +18,9 @@ namespace bsuir_chat_bot
             _bot = bot;
         }
 
+        /// <summary>
+        /// Start sending messages
+        /// </summary>
         public void Work()
         {
             var timeout = 200;

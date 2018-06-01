@@ -6,7 +6,7 @@ using NCalc;
 using VkNet.Model.RequestParams;
 
 namespace bsuir_chat_bot
-{
+{ 
     public class MathProvider: VkBotProvider
     {
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>
@@ -49,7 +49,7 @@ namespace bsuir_chat_bot
                         (int) argz.Parameters[1].Evaluate()));
                 }
             }
-
+            
             void Factorial(string name, FunctionArgs argz)
             {
                 if (name.ToLowerInvariant() == "fact")

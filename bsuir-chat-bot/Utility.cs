@@ -5,6 +5,9 @@ using VkNet.Model;
 
 namespace bsuir_chat_bot
 {
+    /// <summary>
+    /// Extension methods
+    /// </summary>
     public static class Utility
     {
         public static string Truncate(this string value, int maxChars)

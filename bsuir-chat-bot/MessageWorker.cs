@@ -5,6 +5,9 @@ using VkNet.Model.RequestParams;
 namespace bsuir_chat_bot
 {
 
+    /// <summary>
+    /// H
+    /// </summary>
     public class MessageWorker
     {
         private readonly Bot _bot;
