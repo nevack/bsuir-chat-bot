@@ -46,7 +46,7 @@ namespace bsuir_chat_bot
                     ex.EvaluateFunction += Repeat;
                     
                     var what = ex.Evaluate().ToString();
-                    var times = Math.Max((int) argz.Parameters[1].Evaluate(), 4096 / what.Length + 1);
+                    var times = Math.Min((int) argz.Parameters[1].Evaluate(), 4096 / what.Length + 1);
                     
                     var o = new StringBuilder(times * what.Length);
                     for (var i = 0; i < times; i++)
