@@ -31,6 +31,7 @@ namespace bsuir_chat_bot
                 {
                     try
                     {
+                        messageSend.Message = messageSend.Message.Truncate(4096);
                         _bot.Api.Messages.Send(messageSend);
 
                         if (timeout > 200) timeout /= 2;
