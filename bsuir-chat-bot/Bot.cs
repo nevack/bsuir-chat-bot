@@ -242,10 +242,15 @@ namespace bsuir_chat_bot
             {
                 try
                 {
-                    var r = _client.PostAsync($"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Pts}&wait=25&mode=2&version=2", null).Result;	
-                
-                    var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams {
-                        Pts = longPoll.Pts, Ts = longPoll.Ts
+                    var r = _client
+                        .PostAsync(
+                            $"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Pts}&wait=25&mode=2&version=2",
+                            null).Result;
+
+                    var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams
+                    {
+                        Pts = longPoll.Pts,
+                        Ts = longPoll.Ts
                     });
                     longPoll.Pts = response.NewPts;
 
@@ -267,13 +272,12 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (TooManyRequestsException)
+                catch (Exception ex)
                 {
-                    Thread.Sleep(500);
-                }
-                catch (PublicServerErrorException)
-                {
-                    Thread.Sleep(10000);
+                    if (ex is TooManyRequestsException ||
+                        ex is PublicServerErrorException ||
+                        ex is HttpRequestException)
+                    Thread.Sleep(1000);
                 }
             }
         }
