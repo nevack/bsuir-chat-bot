@@ -104,7 +104,7 @@ namespace bsuir_chat_bot
         {
             var (func, args) = command.ParseFunc();
 
-            var message = "";
+            var message = "Error";
 
             switch (func)
             {
