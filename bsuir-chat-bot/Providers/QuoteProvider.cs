@@ -97,7 +97,7 @@ namespace bsuir_chat_bot
                 output.AppendLine(AddQuotes(message, sender));
             }
 
-            return output.ToString();
+            return output.Length == 0?"Error":output.ToString();
         }
         
         protected override MessagesSendParams _handle(Message command)
