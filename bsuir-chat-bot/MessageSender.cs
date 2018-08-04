@@ -45,7 +45,7 @@ namespace bsuir_chat_bot
                     }
                     catch (MessageIsTooLongException e)
                     {
-                        trunc /= timeout > 256 
+                        trunc /= trunc > 128 
                             ? 2 
                             : throw e;
                         _bot.Responses.Enqueue(messageSend);
