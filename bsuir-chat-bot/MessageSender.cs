@@ -43,7 +43,7 @@ namespace bsuir_chat_bot
                         Thread.Sleep(60 /*seconds*/ * 1000);
                         _bot.Responses.Enqueue(messageSend);
                     }
-                    catch (MessageIsTooLongException)
+                    catch (MessageIsTooLongException e)
                     {
                         trunc /= timeout > 256 
                             ? 2 
