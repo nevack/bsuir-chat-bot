@@ -97,7 +97,8 @@ namespace bsuir_chat_bot
                 return new MessagesSendParams
                 {
                     Message = $"Link for 'friend': {image}",
-                    PeerId = command.GetPeerId()
+                    PeerId = command.GetPeerId(),
+                    DontParseLinks = true
                 };
             }
 
@@ -116,7 +117,8 @@ namespace bsuir_chat_bot
                     {
                         Message = $"Reddit [/r/{sub.Name}] {post.Title}\nLink: {post.Shortlink}",
                         Attachments = photos,
-                        PeerId = command.GetPeerId()
+                        PeerId = command.GetPeerId(),
+                        DontParseLinks = true
                     };
                 }
                 catch (WebException)

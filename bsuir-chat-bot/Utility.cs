@@ -29,9 +29,7 @@ namespace bsuir_chat_bot
         {
             if (!message.Id.HasValue) return;
 
-            var ids = new List<long> { message.Id.Value };
-
-            api.Messages.MarkAsRead(ids, message.GetPeerId().ToString());
+            api.Messages.MarkAsRead(message.PeerId.ToString());
         }
         
         public static (string, string[]) ParseFunc(this Message command)
