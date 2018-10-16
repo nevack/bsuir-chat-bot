@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
+using System.Text;
 using NCalc;
 using VkNet.Model.RequestParams;
 
@@ -44,9 +44,17 @@ namespace bsuir_chat_bot
                 {
                     var ex = argz.Parameters[0];
                     ex.EvaluateFunction += Repeat;
+                    
+                    var what = ex.Evaluate().ToString();
+                    var times = Math.Min((int) argz.Parameters[1].Evaluate(), 4096 / what.Length + 1);
+                    
+                    var o = new StringBuilder(times * what.Length);
+                    for (var i = 0; i < times; i++)
+                    {
+                        o.Append(what);
+                    }
 
-                    argz.Result = string.Concat(Enumerable.Repeat(ex.Evaluate().ToString(),
-                        (int) argz.Parameters[1].Evaluate()));
+                    argz.Result = o.ToString();
                 }
             }
             

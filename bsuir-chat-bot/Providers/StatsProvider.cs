@@ -53,7 +53,6 @@ namespace bsuir_chat_bot
                         output.Add(message);
                 }
             }
-            
         }
 
         private string Top(IEnumerable<Message> messages, Func<string, uint> counter)

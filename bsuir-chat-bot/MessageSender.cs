@@ -24,6 +24,7 @@ namespace bsuir_chat_bot
         public void Work()
         {
             var timeout = 200;
+            var trunc = 4096;
 
             while (_bot.BotState != Bot.State.Stoped)
             {
@@ -31,15 +32,24 @@ namespace bsuir_chat_bot
                 {
                     try
                     {
+                        messageSend.Message = messageSend.Message.Truncate(trunc);
                         _bot.Api.Messages.Send(messageSend);
 
                         if (timeout > 200) timeout /= 2;
                     }
                     catch (CaptchaNeededException e)
-                    {    
+                    {
                         Log.Error(e, "Sleeping a minute");
                         Thread.Sleep(60 /*seconds*/ * 1000);
                         _bot.Responses.Enqueue(messageSend);
+                    }
+                    catch (MessageIsTooLongException e)
+                    {
+                        trunc /= trunc > 128 
+                            ? 2 
+                            : throw e;
+                        _bot.Responses.Enqueue(messageSend);
+                        
                     }
                     catch (Exception e)
                     {

@@ -258,7 +258,7 @@ namespace bsuir_chat_bot
                         var match = _botCommandRegex.Match(s[0]);
 
                         if (!match.Success) continue;
-
+                
                         var command = match.Groups[1].Value.ToLower();
 
                         if (!Functions.ContainsKey(command)) continue;
@@ -266,12 +266,9 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (Exception ex)
+                catch (TooManyRequestsException)
                 {
-                    if (ex is TooManyRequestsException ||
-                        ex is PublicServerErrorException ||
-                        ex is HttpRequestException)
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                 }
             }
         }

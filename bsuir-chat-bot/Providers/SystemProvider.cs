@@ -54,8 +54,6 @@ namespace bsuir_chat_bot
         {
             _bot.BotState = Bot.State.Running;
         }
-        
-        private string GetUptime() => _bot.GetUptime();
 
         private string LoadModule(IReadOnlyList<string> names)
         {

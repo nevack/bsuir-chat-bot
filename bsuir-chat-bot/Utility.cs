@@ -11,9 +11,16 @@ namespace bsuir_chat_bot
     /// </summary>
     public static class Utility
     {
+        
+        /// <summary>
+        /// Extension to truncate very long strings with triple dots
+        /// </summary>
+        /// <param name="value">Message to truncate</param>
+        /// <param name="maxChars">Threshold for determining long strings</param>
+        /// <returns></returns>
         public static string Truncate(this string value, int maxChars)
         {
-            return value.Length <= maxChars ? value : value.Substring(0, maxChars) + "...";
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars - 3) + "...";
         }
 
         public static bool IsFromChat(this Message message)
@@ -33,6 +40,11 @@ namespace bsuir_chat_bot
             api.Messages.MarkAsRead(message.PeerId.ToString());
         }
         
+        /// <summary>
+        /// Extension for VkNet.Model.Message to extract bot command and arguments
+        /// </summary>
+        /// <param name="command">Message to extract from</param>
+        /// <returns>Tuple of function name and list of it's args</returns>
         public static (string, string[]) ParseFunc(this Message command)
         {
             var words = command.Text.Split();

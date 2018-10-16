@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
 namespace bsuir_chat_bot
