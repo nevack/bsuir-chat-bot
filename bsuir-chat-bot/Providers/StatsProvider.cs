@@ -66,7 +66,7 @@ namespace bsuir_chat_bot
             {
                 if (message.FromId == null) continue;
                 
-                var w = counter(message.Body);
+                var w = counter(message.Text);
                 
                 if (!top.ContainsKey(message.FromId.Value))
                 {

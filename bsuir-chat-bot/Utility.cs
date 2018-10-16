@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using VkNet;
 using VkNet.Model;
@@ -17,12 +18,12 @@ namespace bsuir_chat_bot
 
         public static bool IsFromChat(this Message message)
         {
-            return message.ChatId.HasValue;
+            return message.ConversationMessageId.HasValue;
         }
 
         public static long GetPeerId(this Message message)
         {
-            return message.ChatId?.ToPeerId() ?? message.FromId ?? 0;
+            return message.PeerId ?? throw new Exception("Peer Id can't be null");
         }
         
         public static void MarkAsRead(this Message message, VkApi api)
@@ -34,7 +35,7 @@ namespace bsuir_chat_bot
         
         public static (string, string[]) ParseFunc(this Message command)
         {
-            var words = command.Body.Split();
+            var words = command.Text.Split();
             var func = words[0].Substring(1);
             
             var args = words.Skip(1).ToArray();

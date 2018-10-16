@@ -234,16 +234,14 @@ namespace bsuir_chat_bot
 
         private void StartLongPolling()
         {
-            var longPoll = Api.Messages.GetLongPollServer(true);
+            var longPoll = Api.Messages.GetLongPollServer(true, 3);
             while (BotState != State.Stoped)
             {
                 try
                 {
-                    _client
-                        .PostAsync(
-                            $"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Pts}&wait=25&mode=2&version=2",
-                            null).Wait();
-
+                    _client.PostAsync( //https://{$server}?act=a_check&key={$key}&ts={$ts}&wait=90&mode=34&version=3
+                            $"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Ts}" +
+                            "&wait=90&mode=34&version=3", null).Wait();
                     var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams
                     {
                         Pts = longPoll.Pts,
@@ -255,7 +253,7 @@ namespace bsuir_chat_bot
                     {
                         if (message.Type == VkNet.Enums.MessageType.Sended) continue;
                         message.FromId = message.UserId;
-                        var s = message.Body.Split(" ").ToList();
+                        var s = message.Text.Split(" ").ToList();
 
                         var match = _botCommandRegex.Match(s[0]);
 
