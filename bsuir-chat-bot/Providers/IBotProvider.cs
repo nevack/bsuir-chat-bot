@@ -42,7 +42,7 @@ namespace bsuir_chat_bot
         /// <exception cref="KeyNotFoundException"></exception>
         public MessagesSendParams Handle(VkNet.Model.Message command)
         {
-            Log.Information($"[ {GetType().Name} ]: called '{command.Body}' by https://vk.com/id{command.FromId}");
+            Log.Information($"[ {GetType().Name} ]: called '{command.Text}' by https://vk.com/id{command.FromId}");
             
             if (State == ProviderState.Unloaded)
                 throw new KeyNotFoundException($"{GetType().Name} is not loaded");

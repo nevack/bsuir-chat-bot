@@ -1,4 +1,3 @@
-﻿using NLog;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
