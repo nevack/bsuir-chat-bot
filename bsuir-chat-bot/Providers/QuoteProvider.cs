@@ -80,15 +80,15 @@ namespace bsuir_chat_bot
                 if (_quotedict.Values.Any(x => x.AuthorId == message.UserId.ToString()))
                 {
                     var target = _quotedict.First(pair => pair.Value.AuthorId == message.UserId.ToString()).Value;
-                    if (target.Quotes.All(quote => quote.Text != message.Body))
+                    if (target.Quotes.All(quote => quote.Text != message.Text))
                     {
-                        if (message.Date != null && message.Body.Length != 0)
+                        if (message.Date != null && message.Text.Length != 0)
                             target.Quotes.Add(new Quote
                             {
                                 AddedBy = sender.ToString(),
                                 OriginalDate = ((DateTimeOffset) message.Date.Value).ToUnixTimeSeconds(),
                                 AddedDate = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds(),
-                                Text = message.Body
+                                Text = message.Text
                             });
                         target.UpdateDate = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds();
                         output.AppendLine($"Added quote No. {target.Quotes.Count-1} by {target.AuthorName}");

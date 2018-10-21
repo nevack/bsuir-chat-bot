@@ -7,11 +7,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using VkNet;
 using VkNet.Enums.Filters;
-using NLog;
 using Serilog;
 using VkNet.Exception;
 using VkNet.Model;
@@ -103,7 +100,7 @@ namespace bsuir_chat_bot
                 .AddJsonFile(configFileName);
 
             // Initialize a new VkApi based on selected config
-            Api = new VkApi(new NullLogger(new LogFactory())) {RequestsPerSecond = 3};
+            Api = new VkApi {RequestsPerSecond = 3};
 
             var configuration = builder.Build();
             
@@ -237,34 +234,31 @@ namespace bsuir_chat_bot
 
         private void StartLongPolling()
         {
-            var longPoll = Api.Messages.GetLongPollServer(true);
+            var longPoll = Api.Messages.GetLongPollServer(true, 3);
             while (BotState != State.Stoped)
             {
                 try
                 {
-                    var r = _client
-                        .PostAsync(
-                            $"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Pts}&wait=25&mode=2&version=2",
-                            null).Result;
-
+                    _client.PostAsync( //https://{$server}?act=a_check&key={$key}&ts={$ts}&wait=90&mode=34&version=3
+                            $"https://{longPoll.Server}?act=a_check&key={longPoll.Key}&ts={longPoll.Ts}" +
+                            "&wait=90&mode=34&version=3", null).Wait();
                     var response = Api.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams
                     {
                         Pts = longPoll.Pts,
-                        Ts = longPoll.Ts
+                        Ts = ulong.Parse(longPoll.Ts)
                     });
                     longPoll.Pts = response.NewPts;
-
 
                     foreach (var message in response.Messages)
                     {
                         if (message.Type == VkNet.Enums.MessageType.Sended) continue;
                         message.FromId = message.UserId;
-                        var s = message.Body.Split(" ").ToList();
+                        var s = message.Text.Split(" ").ToList();
 
                         var match = _botCommandRegex.Match(s[0]);
 
                         if (!match.Success) continue;
-
+                
                         var command = match.Groups[1].Value.ToLower();
 
                         if (!Functions.ContainsKey(command)) continue;
@@ -272,7 +266,7 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (Exception ex)
+                catch (TooManyRequestsException)
                 {
                     if (ex is TooManyRequestsException ||
                         ex is PublicServerErrorException ||

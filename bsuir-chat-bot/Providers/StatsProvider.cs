@@ -44,7 +44,7 @@ namespace bsuir_chat_bot
                     
                     if (!message.Date.HasValue) continue;
                     
-                    if (message.Date < when || (message.Action == MessageAction.ChatInviteUser && message.ActionMid == _bot.Api.UserId))
+                    if (message.Date < when || (message.Action.Type == MessageAction.ChatInviteUser && message.ActionMid == _bot.Api.UserId))
                     {
                         return (message.Date.Value, output);
                     }
@@ -53,7 +53,6 @@ namespace bsuir_chat_bot
                         output.Add(message);
                 }
             }
-            
         }
 
         private string Top(IEnumerable<Message> messages, Func<string, uint> counter)
@@ -66,7 +65,7 @@ namespace bsuir_chat_bot
             {
                 if (message.FromId == null) continue;
                 
-                var w = counter(message.Body);
+                var w = counter(message.Text);
                 
                 if (!top.ContainsKey(message.FromId.Value))
                 {

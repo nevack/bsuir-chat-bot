@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 
 namespace bsuir_chat_bot
 {
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-    [UsedImplicitly]
     public class Author
     {
         public string AuthorId { get; set; }
