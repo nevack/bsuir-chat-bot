@@ -266,7 +266,7 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (TooManyRequestsException)
+                catch (Exception ex)
                 {
                     if (ex is TooManyRequestsException ||
                         ex is PublicServerErrorException ||
