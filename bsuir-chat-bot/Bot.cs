@@ -266,15 +266,9 @@ namespace bsuir_chat_bot
                         Requests.Enqueue(task);
                     }
                 }
-                catch (Exception ex)
+                catch (TooManyRequestsException)
                 {
-                    if (ex is TooManyRequestsException ||
-                        ex is PublicServerErrorException ||
-                        ex is HttpRequestException)
-                    {
-                        Thread.Sleep(1000);
-                        longPoll = Api.Messages.GetLongPollServer(true);
-                    }
+                    Thread.Sleep(500);
                 }
             }
         }
