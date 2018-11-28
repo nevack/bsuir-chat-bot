@@ -235,6 +235,7 @@ namespace bsuir_chat_bot
         private void StartLongPolling()
         {
             var longPoll = Api.Messages.GetLongPollServer(true, 3);
+            var exceptionCounter = 0;
             while (BotState != State.Stoped)
             {
                 try
@@ -265,15 +266,20 @@ namespace bsuir_chat_bot
                         var task = new Command(message, Functions[command].Handle);
                         Requests.Enqueue(task);
                     }
+
+                    exceptionCounter = 0;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    if (ex is TooManyRequestsException ||
-                        ex is PublicServerErrorException ||
-                        ex is HttpRequestException)
+                    if (exceptionCounter < 4)
                     {
                         Thread.Sleep(1000);
-                        longPoll = Api.Messages.GetLongPollServer(true);
+                        longPoll = Api.Messages.GetLongPollServer(true, 3);
+                        exceptionCounter++;
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
