@@ -1,3 +1,4 @@
+using System;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -16,10 +17,17 @@ namespace bsuir_chat_bot
                 .CreateLogger();
             
             Log.Information("Marvin started!");
-            
-            var bot = new Bot("botconfig.json");
-            bot.Start();
-            
+
+            try
+            {
+                var bot = new Bot("botconfig.json");
+                bot.Start();
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.StackTrace);
+                throw;
+            }
             Log.Information("System Halt! Bye.");
             Log.CloseAndFlush();
         }
