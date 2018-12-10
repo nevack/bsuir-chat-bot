@@ -253,7 +253,7 @@ namespace bsuir_chat_bot
                     foreach (var message in response.Messages)
                     {
                         if (message.Type == VkNet.Enums.MessageType.Sended) continue;
-                        message.FromId = message.UserId;
+                        message.UserId = message.UserId ?? message.FromId;
                         var s = message.Text.Split(" ").ToList();
 
                         var match = _botCommandRegex.Match(s[0]);

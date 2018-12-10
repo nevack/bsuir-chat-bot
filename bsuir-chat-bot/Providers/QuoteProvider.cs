@@ -77,9 +77,9 @@ namespace bsuir_chat_bot
             var output = new StringBuilder();
             foreach (var message in msg.ForwardedMessages)
             {
-                if (_quotedict.Values.Any(x => x.AuthorId == message.UserId.ToString()))
+                if (_quotedict.Values.Any(x => x.AuthorId == message.FromId.ToString()))
                 {
-                    var target = _quotedict.First(pair => pair.Value.AuthorId == message.UserId.ToString()).Value;
+                    var target = _quotedict.First(pair => pair.Value.AuthorId == message.FromId.ToString()).Value;
                     if (target.Quotes.All(quote => quote.Text != message.Text))
                     {
                         if (message.Date != null && message.Text.Length != 0)
@@ -97,14 +97,14 @@ namespace bsuir_chat_bot
                 output.AppendLine(AddQuotes(message, sender));
             }
 
-            return output.Length == 0?"Error":output.ToString();
+            return output.ToString();
         }
         
         protected override MessagesSendParams _handle(Message command)
         {
             var (func, args) = command.ParseFunc();
 
-            var message = "Error";
+            var message = "";
 
             switch (func)
             {
@@ -112,7 +112,7 @@ namespace bsuir_chat_bot
                     message = GetQuoteString(args);
                     break;
                 case "addquote":
-                    if (command.UserId != null) message = AddQuotes(command, command.UserId.Value);
+                    if (command.FromId != null) message = AddQuotes(command, command.FromId.Value);
                     if (message == "") message = "No new quotes added";
                     else
                     {
@@ -143,6 +143,8 @@ namespace bsuir_chat_bot
                 default:
                     throw new ArgumentException("No matching command found");
             } 
+            if (message.Remove('\r').Remove('\n').Length == 0)
+                throw new ArgumentException("No quotes added");
 
             return new MessagesSendParams
             {
